@@ -1,0 +1,18 @@
+---
+# tasks file for demo-update
+- name: synchronize files
+  synchronize:
+    src: '{{ SRC_DIR }}'
+    dest: '{{ TARGET }}'
+    delete: yes
+    recursive: yes
+    rsync_opts:      
+      - "--exclude=.git"
+      - "--exclude=.gitignore"
+      - "--exclude=.ci-scripts"
+      - "--exclude=bitbucket-pipelines.yml"
+  become: yes  
+
+- name: set rights for nginx
+  shell: chown -R nginx:nginx {{ TARGET }}
+  become: yes

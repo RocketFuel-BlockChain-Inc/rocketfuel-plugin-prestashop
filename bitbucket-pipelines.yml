@@ -1,0 +1,34 @@
+image: python:3.8.2
+
+definitions:
+  deploy-script: &deploy
+    caches:
+      - pip
+    script:
+      - apt update
+      - apt install -y rsync
+      - pip3 install ansible==2.9.8
+      - chmod 700 .ci-scripts
+      - cd .ci-scripts
+      # run update playbook
+      - ansible-playbook -i "$HOST" -e "ansible_user=$USER TARGET=$TARGET SRC_DIR=$BITBUCKET_CLONE_DIR/" website-update.yml;
+
+pipelines:
+  branches:
+    master:
+      - step:
+          name: Deploy
+          deployment: Production
+          <<: *deploy
+
+    staging:
+      - step:
+          name: Deploy
+          deployment: Staging
+          <<: *deploy
+
+    dev:
+      - step:
+          name: Deploy
+          deployment: Test
+          <<: *deploy

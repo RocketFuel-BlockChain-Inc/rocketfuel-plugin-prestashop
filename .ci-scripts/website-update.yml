@@ -1,0 +1,7 @@
+---
+- name: Update Demo Website
+  hosts: all
+  gather_facts: False
+
+  roles:
+    - role: demo-update
