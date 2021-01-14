@@ -32,7 +32,7 @@ class RocketFuel extends PaymentModule
         $this->currencies_mode        = 'checkbox';
         $this->bootstrap              = true;
         $this->displayName            = 'RocketFuel';
-        $this->description            = 'The RocketFuel blockchain based one-click “BUY-NOW” check-out solution is a game-changing technology that promotes remarkable high conversion efficiencies and further stimulates highly impulsive buying in e-commerce scenarios. Ensuring extremely high payment security and privacy infrastructure that the Internet is lacking.';
+        $this->description            = 'The RocketFuel blockchain based one-click “BUY-NOW” check-out solution is a game-changing technology that promotes remarkable high conversion efficiencies and further stimulates highly impulsive buying in e-commerce scenarios.';
         $this->confirmUninstall       = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
 
