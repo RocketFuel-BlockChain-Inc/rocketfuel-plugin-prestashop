@@ -54,7 +54,9 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
          */
         $this->module->validateOrder(
             (int) $this->context->cart->id,
-            Configuration::get('PS_OS_PAYMENT'),
+            //Configuration::get('PS_OS_PAYMENT'),
+            Configuration::get('PS_OS_BANKWIRE'),
+
             (float) $this->context->cart->getOrderTotal(true, Cart::BOTH),
             $this->module->displayName,
             null,

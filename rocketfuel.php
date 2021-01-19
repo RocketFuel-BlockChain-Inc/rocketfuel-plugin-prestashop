@@ -5,6 +5,9 @@
  * This file is the declaration of the module.
  *
  */
+
+require_once(dirname(__FILE__) . '/classes/Callback.php');
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -15,6 +18,11 @@ class RocketFuel extends PaymentModule
     private $_postErrors = array();
 
     public $address;
+
+    /**
+     * @var string
+     */
+    protected $merchant_id;
 
     /**
      * RocketFuel constructor.
@@ -35,6 +43,8 @@ class RocketFuel extends PaymentModule
         $this->description = 'The RocketFuel blockchain based one-click “BUY-NOW” check-out solution is a game-changing technology that promotes remarkable high conversion efficiencies and further stimulates highly impulsive buying in e-commerce scenarios.';
         $this->confirmUninstall = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
+
+        $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
 
         parent::__construct();
     }
@@ -225,8 +235,18 @@ class RocketFuel extends PaymentModule
         if (!$this->active) {
             return;
         }
-
-        return $this->fetch('module:rocketfuel/views/templates/hook/payment_return.tpl');
+/*
+        //!!! for test !!!
+        $order = new Order(16);
+        $cart = new Cart(16);
+        dump($order);
+        dump($cart);
+        dump($cart->getProducts());
+*/
+        return $this->fetch(
+            'module:rocketfuel/views/templates/hook/payment_return.tpl',
+            ['payload' => $this->getTemplateVariables()]
+        );
     }
 
     /**
@@ -236,6 +256,19 @@ class RocketFuel extends PaymentModule
      */
     protected function getCallbackUrl()
     {
-        return Configuration::get('PS_SHOP_DOMAIN') . '/rocketfuel-callback';
+        return Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/callback.php';
+    }
+
+    /**
+     * Get template variables
+     *
+     * @return array
+     */
+    protected function getTemplateVariables()
+    {
+        $callback = new Callback();
+        $payload = $callback->getOrderPayload(new Order(17));
+        //return json_decode($payload, true);
+        return $payload;
     }
 }
