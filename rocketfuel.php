@@ -7,6 +7,7 @@
  */
 
 require_once(dirname(__FILE__) . '/classes/Callback.php');
+require_once(dirname(__FILE__) . '/.public.php');
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -119,7 +120,7 @@ class RocketFuel extends PaymentModule
                 'title' => $this->l('Settings'),
                 'test' => 'test text'
             ],
-            'description' => 'Callback URL for RocketFuel is <b>' . $this->getCallbackUrl() .'</b>',
+            'description' => 'Callback URL for RocketFuel is <b>' . $this->getCallbackUrl() . '</b>',
             'input' => [
                 [
                     'type' => 'text',
@@ -235,17 +236,23 @@ class RocketFuel extends PaymentModule
         if (!$this->active) {
             return;
         }
-/*
-        //!!! for test !!!
-        $order = new Order(16);
-        $cart = new Cart(16);
-        dump($order);
-        dump($cart);
-        dump($cart->getProducts());
-*/
+
+        $orderID = $params['order']->id;
+
         return $this->fetch(
             'module:rocketfuel/views/templates/hook/payment_return.tpl',
-            ['payload' => $this->getTemplateVariables()]
+            [
+                'order_id' => $orderID,
+                'payload_url' => '/modules/rocketfuel/order.php?order_id='.$orderID,
+                //todo for test
+                'payload' => $this->getPayload($orderID),
+                'hash' => base64_encode(
+                    hash_hmac(
+                        'sha256',
+                        json_encode($this->getPayload($orderID)),
+                        PUB_KEY
+                    ))
+            ]
         );
     }
 
@@ -256,7 +263,8 @@ class RocketFuel extends PaymentModule
      */
     protected function getCallbackUrl()
     {
-        return Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/callback.php';
+        //todo https
+        return 'http://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/callback.php';
     }
 
     /**
@@ -264,11 +272,11 @@ class RocketFuel extends PaymentModule
      *
      * @return array
      */
-    protected function getTemplateVariables()
+    protected function getPayload($orderID)
     {
         $callback = new Callback();
-        $payload = $callback->getOrderPayload(new Order(17));
-        //return json_decode($payload, true);
+        $payload = $callback->getOrderPayload(new Order($orderID));
+
         return $payload;
     }
 }
