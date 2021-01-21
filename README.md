@@ -3,17 +3,22 @@ RocketFuel Payment Method for Prestashop 1.7.x
 
 The registration procedure is described in the [documentation RocketFuel](https://dev.rocketdemo.net/help)
 
-# Installation
+# RocketFuel integration.
 
-Download the module folder and zip it (.zip).
-In the site control panel through the menu, go to "Modules" - "Modules and services".
-Click "Load module", select the archive with the module, wait for download and installation, then click "Settings".
-
-# Setting up
-
-In the list of modules, find "RocketFuel" and click "Install", then "Configure".
-
-Enter "Merchant ID" (can be found in RocketFuel Personal Account). Click Save.
-In your RocketFuel account, go to the site settings, register your callback URL from the module settings page.
-
+Installation
+1) Download the module from RF Bitbucket repository and zip it (zip archive).
+2) Go to your shop admin panel.
+3) Go to "Modules" - "Module Manager".
+4) Click "Upload module".
+5) Select the zip archive with RF PrestaShop module.
+6) Wait for it's uploading.
+7) Find "RocketFuel" in the list of modules below.
+8)  Click "Configure".
+9) Enter "Merchant ID" (provided in RocketFuel merchant UI for registered merchants).
+10) Copy a callback URL
+11) Click Save.
+12) Go to your RocketFuel merchant account.
+13) Click "Edit" in the bottom left corner. A window will pop up.
+14) Paste callback URL.
+15) Click "Save".
 
