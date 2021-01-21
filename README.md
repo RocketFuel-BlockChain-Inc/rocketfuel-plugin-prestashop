@@ -1,24 +1,19 @@
 # RocketFuel - RocketFuel Payment Method for Prestashop 1.7.x
 RocketFuel Payment Method for Prestashop 1.7.x
-Для чего предназначен модуль, нужен красивый текст, на английском. 
-Для корректной работы модуля необходима регистрация в сервисе.
 
-Порядок регистрации описан в [документации RocketFuel](https://dev.rocketdemo.net/help)
-## Возможности
+The registration procedure is described in the [documentation RocketFuel](https://dev.rocketdemo.net/help)
 
-* Тут нужен список возможностей модуля
+# Installation
 
-# Установка
+Download the module folder and zip it (.zip).
+In the site control panel through the menu, go to "Modules" - "Modules and services".
+Click "Load module", select the archive with the module, wait for download and installation, then click "Settings".
 
-Скачайте папку с модулем и заархивируйте ее (.zip).  
-В панели управления сайтом через меню перейдите в "Модули" - "Модули и сервисы".  
-Нажмите "Загрузить модуль", выберете архив с модулем, дождитесь загрузки и установки, затем нажмите "Настройка".  
+# Setting up
 
-# Настройка
+In the list of modules, find "RocketFuel" and click "Install", then "Configure".
 
-В списке модулей найдите "RocketFuel" и нажмите "Установить", затем "Настроить".  
-
-Введите "Merchant ID" (можно найти в Личном кабинете RocketFuel). Нажмите "Сохранить".
-В личном кабинете RocketFuel зайдите в настройки сайта, пропишите ваш callback со страницы настроек модуля.
+Enter "Merchant ID" (can be found in RocketFuel Personal Account). Click Save.
+In your RocketFuel account, go to the site settings, register your callback URL from the module settings page.
 
 

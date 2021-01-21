@@ -7,11 +7,12 @@
  */
 
 require_once(dirname(__FILE__) . '/classes/Callback.php');
-require_once(dirname(__FILE__) . '/.public.php');
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
+
+define('DEBUG', true);
 
 class RocketFuel extends PaymentModule
 {
@@ -244,14 +245,11 @@ class RocketFuel extends PaymentModule
             [
                 'order_id' => $orderID,
                 'payload_url' => '/modules/rocketfuel/order.php?order_id='.$orderID,
-                //todo for test
-                'payload' => $this->getPayload($orderID),
-                'hash' => base64_encode(
-                    hash_hmac(
-                        'sha256',
-                        json_encode($this->getPayload($orderID)),
-                        PUB_KEY
-                    ))
+                /**
+                 * for view payload in testing
+                 */
+                'debug' => DEBUG,
+                'payload' => json_encode($this->getPayload($orderID)),
             ]
         );
     }
@@ -263,8 +261,7 @@ class RocketFuel extends PaymentModule
      */
     protected function getCallbackUrl()
     {
-        //todo https
-        return 'http://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/callback.php';
+        return 'https://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/callback.php';
     }
 
     /**

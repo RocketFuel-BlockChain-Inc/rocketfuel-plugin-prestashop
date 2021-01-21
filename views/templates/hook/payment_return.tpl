@@ -56,7 +56,11 @@
 </style>
 
 <iframe id="rocketfuel-iframe" src="https://iframe.rocketdemo.net"></iframe>
-
+{nocache}
+  {if ($debug)}
+    {$payload}
+  {/if}
+{/nocache}
 <script>
   {nocache}
 

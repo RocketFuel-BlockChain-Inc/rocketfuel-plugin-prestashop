@@ -1,7 +1,7 @@
 <?php
 
 use GuzzleHttp\Psr7\Response;
-require_once(dirname(__FILE__) . '/../.public.php');
+//require_once(dirname(__FILE__) . '/../.public.php');
 
 class Callback
 {
@@ -129,20 +129,28 @@ class Callback
         $order = $this->validate();
 
         $signature = $this->request['signature'];
-        //dump($order);
 
+        $public_key = openssl_pkey_get_public(
+            file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
+        );
 
-        $hash = base64_encode(
-            hash_hmac(
-                'sha256',
-                json_encode($this->getOrderPayload($order)),
-                PUB_KEY
-            ));
+        $verify = openssl_verify(
+            json_encode($this->getOrderPayload($order)),
+            base64_decode($signature),
+            $public_key,
+            'SHA256'
+        );
 
-        if($hash === $signature){
+        if($verify){
             $this->makeOrderPayed($order);
             //todo response
             echo json_encode(['status' => 'ok']);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'signature not valid'
+            ]);
         }
+
     }
 }
