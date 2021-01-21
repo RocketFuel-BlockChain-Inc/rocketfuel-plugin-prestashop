@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>rocketfuel</name>
+    <displayName><![CDATA[RocketFuel]]></displayName>
+    <version><![CDATA[0.1]]></version>
+    <description><![CDATA[The RocketFuel blockchain based one-click &ldquo;BUY-NOW&rdquo; check-out solution is a game-changing technology that promotes remarkable high conversion efficiencies and further stimulates highly impulsive buying in e-commerce scenarios.]]></description>
+    <author><![CDATA[RocketFuel Inc.]]></author>
+    <tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[Are you sure you want to uninstall this module?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>
