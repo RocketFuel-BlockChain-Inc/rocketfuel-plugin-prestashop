@@ -3,6 +3,8 @@
 use GuzzleHttp\Psr7\Response;
 //require_once(dirname(__FILE__) . '/../.public.php');
 
+define('DEBUG', true);
+
 class Callback
 {
     /**
@@ -94,7 +96,7 @@ class Callback
             ];
         };
 
-        $out['amount'] = $order->total_paid;
+        $out['amount'] = DEBUG ? $order->total_paid : $order->total_paid/100;
         $out['merchant_id'] = $this->merchant_id;
         $out['order'] = $order->id;
         return $this->sortPayload($out);
