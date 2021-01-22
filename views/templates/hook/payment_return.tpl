@@ -15,7 +15,7 @@
     top: 10px;
     right: 10px;
     background: transparent;
-    position: absolute;
+    position: fixed;
     z-index: 10001 !important;
     cursor: pointer;
   }
@@ -55,16 +55,18 @@
   }
 </style>
 {nocache}
-<iframe id="rocketfuel-iframe" src="https://iframe.rocketdemo.net"></iframe>
-
+  <div id="rocketfuel-iframe-container">
+    <div id="rocketfuel-drag">
+      <div id="rocketfuel-dragheader"></div>
+    </div>
+    <iframe id="rocketfuel-iframe" src="https://iframe.rocketdemo.net"></iframe>
+  </div>
   {if ($debug)}
     {$payload}
   {/if}
 {/nocache}
 <script>
   {nocache}
-
-
   function getPayload() {
     let url = '{$payload_url}';
     let payload;
@@ -74,24 +76,42 @@
     request.addEventListener("readystatechange", () => {
       if (request.readyState === 4 && request.status === 200) {
         payload = JSON.parse(request.responseText)
-        //payload = request.responseText
       }
     });
     request.send();
     return payload;
   }
 
+  // Это пример отправки корзины в расширение (при помощи инжетированного скрипта)
+  /*
+  setTimeout(function () {
+    if(typeof rocketfuel !== 'undefined'){
+      rocketfuel.setCartData(getPayload());
+    }
+  }, 100);
+*/
   window.onload = function () {
-    iframe = document.getElementById('rocketfuel-iframe');
     payload = getPayload();
-    iframe.onload = function () {
+    iframe = document.getElementById('rocketfuel-iframe');
+    iframe_container = document.getElementById('rocketfuel-iframe-container');
+
+    //check if extension installed
+    if (checkExtension()) {
+      iframe_container.remove();
+      console.log('send cart to extension')
+      rocketfuel.setCartData(payload);
+      rocketfuel.toggleExtension();
+    } else {
+      console.log('send cart to iframe')
       iframe.contentWindow.postMessage({
         type: 'rocketfuel_send_cart',
-        data: getPayload()
+        data: payload
       }, '*');
-    };
+      // Make the iframe draggable:
+      dragElement(document.getElementById("rocketfuel-drag"), iframe);
+    }
 
-    // Это пример прослушивания сообщений
+    // Events listener example
     window.addEventListener('message', (event) => {
       // Это сообщения и для айфрейма и для расширения
       if (event.data.type === 'rocketfuel_result_ok') {
@@ -99,11 +119,11 @@
         //todo redirect to http://pshop.local/index.php?controller=order-detail&id_order=
         // TODO just flag about success payment
       }
-      // Это сообщение для айфрейма
+      // for iframe
       if (event.data.type === 'rocketfuel_change_height') {
         iframe.style.height = event.data.data;
       }
-      // Это сообщение для айфрейма
+      // for iframe
       if (event.data.type === 'rocketfuel_iframe_close') {
         // TODO destroy iframe
         iframe.remove();
@@ -119,9 +139,6 @@
       }
     });
 
-    // Make the iframe draggable:
-    //dragElement(document.getElementById("rocketfuel-drag"), iframe);
-    dragElement(document.getElementById("rocketfuel-iframe"), iframe);
     function dragElement(elmnt, iframe) {
       var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
       if (document.getElementById(elmnt.id + "header")) {
@@ -166,13 +183,8 @@
     }
   }
 
-
-  // Это пример отправки корзины в расширение (при помощи инжетированного скрипта)
-  setTimeout(function () {
-    if(typeof rocketfuel !== 'undefined'){
-      rocketfuel.setCartData(getPayload());
-    }
-  }, 100);
-
+  function checkExtension() {
+    return typeof rocketfuel === 'object';
+  }
   {/nocache}
 </script>
