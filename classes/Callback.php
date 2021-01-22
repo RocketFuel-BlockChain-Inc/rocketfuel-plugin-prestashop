@@ -94,7 +94,7 @@ class Callback
             ];
         };
 
-        $out['amount'] = DEBUG ? $order->total_paid : $order->total_paid/100;
+        $out['amount'] = $order->total_paid/100;
         $out['merchant_id'] = $this->merchant_id;
         $out['order'] = $order->id;
         return $this->sortPayload($out);
