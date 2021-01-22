@@ -54,9 +54,9 @@
     transform: translate3d(0px, 0px, 0px);
   }
 </style>
-
-<iframe id="rocketfuel-iframe" src="https://iframe.rocketdemo.net"></iframe>
 {nocache}
+<iframe id="rocketfuel-iframe" src="https://iframe.rocketdemo.net"></iframe>
+
   {if ($debug)}
     {$payload}
   {/if}
@@ -172,7 +172,7 @@
     if(typeof rocketfuel !== 'undefined'){
       rocketfuel.setCartData(getPayload());
     }
-  }, 1000);
+  }, 100);
 
   {/nocache}
 </script>
