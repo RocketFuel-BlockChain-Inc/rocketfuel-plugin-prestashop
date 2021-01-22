@@ -3,8 +3,6 @@
 use GuzzleHttp\Psr7\Response;
 //require_once(dirname(__FILE__) . '/../.public.php');
 
-define('DEBUG', true);
-
 class Callback
 {
     /**
