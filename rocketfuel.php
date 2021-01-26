@@ -21,10 +21,23 @@ class RocketFuel extends PaymentModule
 
     public $address;
 
+    const IFRAMES = [
+        'https://iframe-stage1.rocketdemo.net',
+        'https://iframe-dev.rocketdemo.net',
+        'https://iframe-stage2.rocketdemo.net',
+        'https://iframe-test.rocketdemo.net',
+        'https://iframe.rocketfuelblockchain.com'
+    ];
+
     /**
      * @var string
      */
     protected $merchant_id;
+
+    /**
+     * @var string
+     */
+    protected $rf_iframe;
 
     /**
      * RocketFuel constructor.
@@ -47,6 +60,7 @@ class RocketFuel extends PaymentModule
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
 
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
+        $this->rf_iframe = Configuration::get('ROCKETFUEL_IFRAME');
 
         parent::__construct();
     }
@@ -88,21 +102,36 @@ class RocketFuel extends PaymentModule
         $output = null;
 
         if (Tools::isSubmit('submit' . $this->name)) {
-            $myModuleName = strval(Tools::getValue('ROCKETFUEL_MERCHANT_ID'));
+            $merchantID = strval(Tools::getValue('ROCKETFUEL_MERCHANT_ID'));
+            $rf_iframe = strval(Tools::getValue('ROCKETFUEL_IFRAME'));
 
-            if (
-                !$myModuleName ||
-                empty($myModuleName) ||
-                !Validate::isGenericName($myModuleName)
-            ) {
-                $output .= $this->displayError($this->l('Invalid Configuration value'));
-            } else {
-                Configuration::updateValue('ROCKETFUEL_MERCHANT_ID', $myModuleName);
+            if ($this->validateForm($merchantID, $rf_iframe)) {
+                Configuration::updateValue('ROCKETFUEL_MERCHANT_ID', $merchantID);
+                Configuration::updateValue('ROCKETFUEL_IFRAME', $rf_iframe);
+
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
+            } else {
+                $output .= $this->displayError($this->l('Invalid Configuration value'));
             }
         }
 
         return $output . $this->displayForm();
+    }
+
+    /**
+     * validate input form values
+     *
+     * @param $merchantID
+     * @param $rf_iframe
+     * @return bool
+     */
+    protected function validateForm($merchantID, $rf_iframe)
+    {
+        return !(
+            (!$merchantID || empty($merchantID) || !Validate::isGenericName($merchantID))
+            ||
+            (!$rf_iframe || empty($rf_iframe) || !Validate::isGenericName($rf_iframe))
+        );
     }
 
     /**
@@ -119,7 +148,6 @@ class RocketFuel extends PaymentModule
         $fieldsForm[0]['form'] = [
             'legend' => [
                 'title' => $this->l('Settings'),
-                'test' => 'test text'
             ],
             'description' => 'Callback URL for RocketFuel is <b>' . $this->getCallbackUrl() . '</b>',
             'input' => [
@@ -130,9 +158,18 @@ class RocketFuel extends PaymentModule
                     'size' => 20,
                     'required' => true
                 ],
-
+                [
+                    'type'    => 'select',
+                    'label' => $this->l('RocketFuel iframe URL'),
+                    'name' => 'ROCKETFUEL_IFRAME',
+                    'options' => [
+                        'query' => $this->getSelectIframeValues(),
+                        'id'    => 'name',
+                        'name'  => 'name'
+                    ],
+                    'required' => true
+                ],
             ],
-            'div' => 'test',
             'submit' => [
                 'title' => $this->l('Save'),
                 'class' => 'btn btn-default pull-right'
@@ -169,9 +206,21 @@ class RocketFuel extends PaymentModule
         ];
 
         // Load current value
-        $helper->fields_value['ROCKETFUEL_MERCHANT_ID'] = Tools::getValue('ROCKETFUEL_MERCHANT_ID', Configuration::get('ROCKETFUEL_MERCHANT_ID'));
+        $helper->fields_value['ROCKETFUEL_MERCHANT_ID'] =
+            Tools::getValue('ROCKETFUEL_MERCHANT_ID', Configuration::get('ROCKETFUEL_MERCHANT_ID'));
+        $helper->fields_value['ROCKETFUEL_IFRAME'] =
+            Tools::getValue('ROCKETFUEL_IFRAME', Configuration::get('ROCKETFUEL_IFRAME'));
 
         return $helper->generateForm($fieldsForm);
+    }
+
+    protected function getSelectIframeValues()
+    {
+        $out = [];
+        foreach (self::IFRAMES as $key => $value){
+$out[] = ['id' => $key, 'name' => $value];
+        }
+        return $out;
     }
 
     /**
@@ -243,8 +292,9 @@ class RocketFuel extends PaymentModule
         return $this->fetch(
             'module:rocketfuel/views/templates/hook/payment_return.tpl',
             [
+                'iframe_url' => Configuration::get('ROCKETFUEL_IFRAME') ?: '',
                 'order_id' => $orderID,
-                'payload_url' => '/modules/rocketfuel/order.php?order_id='.$orderID,
+                'payload_url' => '/modules/rocketfuel/order.php?order_id=' . $orderID,
                 /**
                  * for view payload in testing
                  */
