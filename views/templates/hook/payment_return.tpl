@@ -59,7 +59,7 @@
     <div id="rocketfuel-drag">
       <div id="rocketfuel-dragheader"></div>
     </div>
-    <iframe id="rocketfuel-iframe" src="https://iframe.rocketdemo.net"></iframe>
+    <iframe id="rocketfuel-iframe" src="{$iframe_url}"></iframe>
   </div>
   {if ($debug)}
     {$payload}
@@ -103,6 +103,7 @@
       rocketfuel.toggleExtension();
     } else {
       console.log('send cart to iframe')
+      iframe.src = iframe.src
       iframe.contentWindow.postMessage({
         type: 'rocketfuel_send_cart',
         data: payload
