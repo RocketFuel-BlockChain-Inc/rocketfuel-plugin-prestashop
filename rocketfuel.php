@@ -23,7 +23,7 @@ class RocketFuel extends PaymentModule
 
     const IFRAMES = [
         'https://iframe-stage1.rocketdemo.net',
-        'https://iframe-dev.rocketdemo.net',
+        'https://iframe.rocketdemo.net',
         'https://iframe-stage2.rocketdemo.net',
         'https://iframe-test.rocketdemo.net',
         'https://iframe.rocketfuelblockchain.com'
