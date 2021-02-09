@@ -86,17 +86,21 @@ class Callback
     public function getOrderPayload($order)
     {
         $out = [];
+
         foreach ($order->getProducts() as $product) {
-            $out['cart'][] = [
-                'id' => $product['product_id'],
-                'price' => $product['total_price'],
-                'name' => $product['product_name']
-            ];
+            for ($i = $product['product_quantity']; $i > 0; $i--) {
+                $out['cart'][] = [
+                    'id' => $product['product_id'],
+                    'price' => $product['total_price'],
+                    'name' => $product['product_name']
+                ];
+            }
         };
 
         $out['amount'] = $order->total_paid/100;
         $out['merchant_id'] = $this->merchant_id;
         $out['order'] = $order->id;
+
         return $this->sortPayload($out);
     }
 
