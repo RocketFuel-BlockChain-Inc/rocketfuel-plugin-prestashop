@@ -1,6 +1,7 @@
 <?php
 
 use GuzzleHttp\Psr7\Response;
+
 //require_once(dirname(__FILE__) . '/../.public.php');
 
 class Callback
@@ -44,7 +45,7 @@ class Callback
             throw new Exception('order not found');
         }
 
-        if ( ((int)$order->getCurrentState() <> (int)Configuration::get('PS_OS_BANKWIRE')) ) {
+        if (((int)$order->getCurrentState() <> (int)Configuration::get('PS_OS_BANKWIRE'))) {
             throw new Exception('order payed');
         }
 
@@ -71,12 +72,14 @@ class Callback
      * {
      * "cart":[{
      * "id":"38",
-     * "price":0.05,
      * "name":"Beanie with Logo"
+     * "price":0.05,
+     * "quantity": 1
      * },{
      * "id":"22",
-     * "price":0.05,
      * "name":"Belt"
+     * "price":0.05,
+     * "quantity": 2
      * }],
      * "amount":0.133,
      * "merchant_id":"b49e76e5-34a4-474e-9ab5-dad303f98891",
@@ -86,17 +89,20 @@ class Callback
     public function getOrderPayload($order)
     {
         $out = [];
+
         foreach ($order->getProducts() as $product) {
             $out['cart'][] = [
                 'id' => $product['product_id'],
+                'name' => $product['product_name'],
                 'price' => $product['total_price'],
-                'name' => $product['product_name']
+                'quantity' => $product['product_quantity']
             ];
         };
 
-        $out['amount'] = $order->total_paid/100;
+        $out['amount'] = $order->total_paid;
         $out['merchant_id'] = $this->merchant_id;
         $out['order'] = $order->id;
+
         return $this->sortPayload($out);
     }
 
@@ -141,7 +147,7 @@ class Callback
             'SHA256'
         );
 
-        if($verify){
+        if ($verify) {
             $this->makeOrderPayed($order);
             //todo response
             echo json_encode(['status' => 'ok']);
