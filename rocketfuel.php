@@ -4,6 +4,7 @@
  *
  * This file is the declaration of the module.
  *
+ * v 1.1.3
  */
 
 require_once(dirname(__FILE__) . '/classes/Callback.php');
@@ -48,7 +49,7 @@ class RocketFuel extends PaymentModule
     {
         $this->name = 'rocketfuel';
         $this->tab = 'payments_gateways';
-        $this->version = '0.1';
+        $this->version = '0.2';
         $this->author = 'RocketFuel Inc.';
         $this->controllers = array('payment', 'validation');
         $this->currencies = true;
@@ -218,7 +219,7 @@ class RocketFuel extends PaymentModule
     {
         $out = [];
         foreach (self::IFRAMES as $key => $value){
-$out[] = ['id' => $key, 'name' => $value];
+            $out[] = ['id' => $key, 'name' => $value];
         }
         return $out;
     }

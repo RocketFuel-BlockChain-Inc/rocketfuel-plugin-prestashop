@@ -1,6 +1,7 @@
 <?php
 
 use GuzzleHttp\Psr7\Response;
+
 //require_once(dirname(__FILE__) . '/../.public.php');
 
 class Callback
@@ -44,7 +45,7 @@ class Callback
             throw new Exception('order not found');
         }
 
-        if ( ((int)$order->getCurrentState() <> (int)Configuration::get('PS_OS_BANKWIRE')) ) {
+        if (((int)$order->getCurrentState() <> (int)Configuration::get('PS_OS_BANKWIRE'))) {
             throw new Exception('order payed');
         }
 
@@ -88,19 +89,21 @@ class Callback
         $out = [];
 
         foreach ($order->getProducts() as $product) {
-            for ($i = $product['product_quantity']; $i > 0; $i--) {
-                $out['cart'][] = [
-                    'id' => $product['product_id'],
-                    'price' => $product['total_price'],
-                    'name' => $product['product_name']
-                ];
-            }
+            $out['cart'][] = [
+                'id' => $product['product_id'],
+                'name' => $product['product_name'],
+                'price' => $product['total_price'],
+                'quantity' => $product['product_quantity']
+            ];
         };
 
-        $out['amount'] = $order->total_paid/100;
+        $out['amount'] = $order->total_paid;
         $out['merchant_id'] = $this->merchant_id;
         $out['order'] = $order->id;
 
+        echo '<pre>';
+        var_dump($out);
+        echo '</pre>';
         return $this->sortPayload($out);
     }
 
@@ -145,7 +148,7 @@ class Callback
             'SHA256'
         );
 
-        if($verify){
+        if ($verify) {
             $this->makeOrderPayed($order);
             //todo response
             echo json_encode(['status' => 'ok']);
