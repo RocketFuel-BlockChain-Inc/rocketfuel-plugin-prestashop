@@ -72,12 +72,14 @@ class Callback
      * {
      * "cart":[{
      * "id":"38",
-     * "price":0.05,
      * "name":"Beanie with Logo"
+     * "price":0.05,
+     * "quantity": 1
      * },{
      * "id":"22",
-     * "price":0.05,
      * "name":"Belt"
+     * "price":0.05,
+     * "quantity": 2
      * }],
      * "amount":0.133,
      * "merchant_id":"b49e76e5-34a4-474e-9ab5-dad303f98891",
