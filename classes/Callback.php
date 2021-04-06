@@ -103,9 +103,6 @@ class Callback
         $out['merchant_id'] = $this->merchant_id;
         $out['order'] = $order->id;
 
-        echo '<pre>';
-        var_dump($out);
-        echo '</pre>';
         return $this->sortPayload($out);
     }
 
