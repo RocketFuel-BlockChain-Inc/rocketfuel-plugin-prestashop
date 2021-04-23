@@ -123,8 +123,14 @@ class RocketfuelService
         $keys = array_keys($payload);
         sort($keys);
 
-        foreach ($keys as $key)
-            $sorted[$key] = is_array($payload[$key]) ? $this->sortPayload($payload[$key]) : (string)$payload[$key];
+        foreach ($keys as $key){
+            if(is_bool($payload[$key])){
+                $sorted[$key] =$payload[$key];
+            }else{
+                $sorted[$key] = is_array($payload[$key]) ? $this->sortPayload($payload[$key]) : (string)$payload[$key];
+            }
+        }
+
         return $sorted;
     }
 
