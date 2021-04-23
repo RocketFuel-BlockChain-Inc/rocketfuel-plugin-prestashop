@@ -7,7 +7,7 @@
  * v 0.1.1
  */
 
-require_once(dirname(__FILE__) . '/classes/Callback.php');
+require_once(dirname(__FILE__) . '/classes/RocketfuelService.php');
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -39,6 +39,10 @@ class RocketFuel extends PaymentModule
      * @var string
      */
     protected $rf_iframe;
+    /**
+     * @var string
+     */
+    protected $rf_pkey;
 
     /**
      * RocketFuel constructor.
@@ -49,7 +53,7 @@ class RocketFuel extends PaymentModule
     {
         $this->name = 'rocketfuel';
         $this->tab = 'payments_gateways';
-        $this->version = '0.1.1';
+        $this->version = '0.1.2';
         $this->author = 'RocketFuel Inc.';
         $this->controllers = array('payment', 'validation');
         $this->currencies = true;
@@ -62,6 +66,7 @@ class RocketFuel extends PaymentModule
 
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
         $this->rf_iframe = Configuration::get('ROCKETFUEL_IFRAME');
+        $this->rf_pkey = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
 
         parent::__construct();
     }
@@ -105,10 +110,11 @@ class RocketFuel extends PaymentModule
         if (Tools::isSubmit('submit' . $this->name)) {
             $merchantID = strval(Tools::getValue('ROCKETFUEL_MERCHANT_ID'));
             $rf_iframe = strval(Tools::getValue('ROCKETFUEL_IFRAME'));
-
+            $rf_pkey=strval(Tools::getValue('ROCKETFUEL_MERCHANT_PUBLIC_KEY'));
             if ($this->validateForm($merchantID, $rf_iframe)) {
                 Configuration::updateValue('ROCKETFUEL_MERCHANT_ID', $merchantID);
                 Configuration::updateValue('ROCKETFUEL_IFRAME', $rf_iframe);
+                Configuration::updateValue('ROCKETFUEL_MERCHANT_PUBLIC_KEY', $rf_pkey);
 
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             } else {
@@ -170,6 +176,13 @@ class RocketFuel extends PaymentModule
                     ],
                     'required' => true
                 ],
+                [
+                    'type' => 'textarea',
+                    'label' => $this->l('User signature'),
+                    'name' => 'ROCKETFUEL_MERCHANT_PUBLIC_KEY',
+                    'size' => 20,
+                    'required' => true
+                ]
             ],
             'submit' => [
                 'title' => $this->l('Save'),
@@ -211,6 +224,8 @@ class RocketFuel extends PaymentModule
             Tools::getValue('ROCKETFUEL_MERCHANT_ID', Configuration::get('ROCKETFUEL_MERCHANT_ID'));
         $helper->fields_value['ROCKETFUEL_IFRAME'] =
             Tools::getValue('ROCKETFUEL_IFRAME', Configuration::get('ROCKETFUEL_IFRAME'));
+        $helper->fields_value['ROCKETFUEL_MERCHANT_PUBLIC_KEY'] =
+            Tools::getValue('ROCKETFUEL_MERCHANT_PUBLIC_KEY', Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY'));
 
         return $helper->generateForm($fieldsForm);
     }
@@ -322,7 +337,7 @@ class RocketFuel extends PaymentModule
      */
     protected function getPayload($orderID)
     {
-        $callback = new Callback();
+        $callback = new RocketfuelService();
         $payload = $callback->getOrderPayload(new Order($orderID));
 
         return $payload;

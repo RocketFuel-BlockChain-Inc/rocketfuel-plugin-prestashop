@@ -124,6 +124,23 @@
       if (event.data.type === 'rocketfuel_change_height') {
         iframe.style.height = event.data.data;
       }
+      //Это сообщение для айфрейма
+      if (event.data.type === 'rocketfuel_new_height') {
+        if(!!iframe){
+          const windowHeight = window.innerHeight - 20;
+          if (windowHeight < event.data.data) {
+            iframe.style.height = windowHeight+'px';
+            iframe.contentWindow.postMessage({
+              type: 'rocketfuel_max_height',
+              data: windowHeight,
+            }, '*');
+          }else {
+            iframe.style.height = event.data.data+'px';
+          }
+        }
+
+      }
+
       // for iframe
       if (event.data.type === 'rocketfuel_iframe_close') {
         // TODO destroy iframe
