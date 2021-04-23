@@ -156,7 +156,7 @@ class RocketFuel extends PaymentModule
             'legend' => [
                 'title' => $this->l('Settings'),
             ],
-            'description' => 'RocketfuelService URL for RocketFuel is <b>' . $this->getCallbackUrl() . '</b>',
+            'description' => 'Callback URL for RocketFuel is <b>' . $this->getCallbackUrl() . '</b>',
             'input' => [
                 [
                     'type' => 'text',
@@ -327,7 +327,7 @@ class RocketFuel extends PaymentModule
      */
     protected function getCallbackUrl()
     {
-        return 'https://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/rocketfuel.php';
+        return 'https://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/callback.php';
     }
 
     /**
