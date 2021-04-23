@@ -16,11 +16,12 @@ Installation
 7. Find "RocketFuel" in the list of modules below.
 8.  Click "Configure".
 9. Enter "Merchant ID" (provided in RocketFuel merchant UI for registered merchants).
-10. Copy a callback URL
-11. Click Save.
-12. Go to your RocketFuel merchant account.
-13. Click "Edit" in the bottom left corner. A window will pop up.
-14. Paste callback URL.
-15. Click "Save".
+10. Enter "Public signature" (provided in RocketFuel).
+11. Copy a callback URL
+12. Click Save.
+13. Go to your RocketFuel merchant account.
+14. Click "Edit" in the bottom left corner. A window will pop up.
+15. Paste callback URL.
+16. Click "Save".
 
 

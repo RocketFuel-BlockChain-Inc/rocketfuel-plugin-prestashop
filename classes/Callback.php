@@ -23,6 +23,7 @@ class Callback
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
+        $this->rf_signature = Configuration::get('ROCKETFUEL_SIGNATURE');
         $this->request = $request;
     }
 
@@ -39,8 +40,8 @@ class Callback
         }
 
         $data = json_decode($this->request['data'], true);
-        $order = new Order($data['offerId']);
 
+        $order = new Order($data['offerId']);
         if (!$order->reference) {
             throw new Exception('order not found');
         }
@@ -88,6 +89,7 @@ class Callback
      */
     public function getOrderPayload($order)
     {
+
         $out = [];
 
         foreach ($order->getProducts() as $product) {
@@ -102,6 +104,7 @@ class Callback
         $out['amount'] = $order->total_paid;
         $out['merchant_id'] = $this->merchant_id;
         $out['order'] = $order->id;
+        $out['encrypted'] = $this->getEncrypted($order->total_paid,  $order->id);
 
         return $this->sortPayload($out);
     }
@@ -159,4 +162,30 @@ class Callback
         }
 
     }
+    public function getEncrypted($amount, $order_id)
+    {
+        $to_crypt = json_encode([
+            'amount' => $amount,
+            'merchant_id' => $this->merchant_id,
+            'order' => $order_id
+        ]);
+
+        $out = '';
+
+        $cert = $this->rf_signature;
+
+        $public_key = openssl_pkey_get_public($cert);
+        $key_lenght = openssl_pkey_get_details($public_key);
+
+        $part_len = $key_lenght['bits'] / 8 - 11;
+        $parts = str_split($to_crypt, $part_len);
+        foreach ($parts as $part) {
+            $encrypted_temp = '';
+            openssl_public_encrypt($part, $encrypted_temp, $public_key,OPENSSL_PKCS1_OAEP_PADDING);
+            $out .=  $encrypted_temp;
+        }
+
+        return base64_encode($out);
+    }
+
 }
