@@ -4,7 +4,7 @@ use GuzzleHttp\Psr7\Response;
 
 //require_once(dirname(__FILE__) . '/../.public.php');
 
-class Callback
+class RocketfuelService
 {
     /**
      * Request data
@@ -23,7 +23,7 @@ class Callback
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
-        $this->rf_signature = Configuration::get('ROCKETFUEL_SIGNATURE');
+        $this->merchant_pub_key = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
         $this->request = $request;
     }
 
@@ -162,6 +162,12 @@ class Callback
         }
 
     }
+
+    /**
+     * @param $amount
+     * @param $order_id
+     * @return string
+     */
     public function getEncrypted($amount, $order_id)
     {
         $to_crypt = json_encode([
@@ -172,7 +178,7 @@ class Callback
 
         $out = '';
 
-        $cert = $this->rf_signature;
+        $cert = $this->merchant_pub_key;
 
         $public_key = openssl_pkey_get_public($cert);
         $key_lenght = openssl_pkey_get_details($public_key);
