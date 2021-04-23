@@ -42,7 +42,7 @@ class RocketFuel extends PaymentModule
     /**
      * @var string
      */
-    protected $rf_signature;
+    protected $rf_pkey;
 
     /**
      * RocketFuel constructor.
@@ -66,7 +66,7 @@ class RocketFuel extends PaymentModule
 
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
         $this->rf_iframe = Configuration::get('ROCKETFUEL_IFRAME');
-        $this->rf_signature = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
+        $this->rf_pkey = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
 
         parent::__construct();
     }
@@ -110,11 +110,11 @@ class RocketFuel extends PaymentModule
         if (Tools::isSubmit('submit' . $this->name)) {
             $merchantID = strval(Tools::getValue('ROCKETFUEL_MERCHANT_ID'));
             $rf_iframe = strval(Tools::getValue('ROCKETFUEL_IFRAME'));
-            $rf_signature=strval(Tools::getValue('ROCKETFUEL_MERCHANT_PUBLIC_KEY'));
+            $rf_pkey=strval(Tools::getValue('ROCKETFUEL_MERCHANT_PUBLIC_KEY'));
             if ($this->validateForm($merchantID, $rf_iframe)) {
                 Configuration::updateValue('ROCKETFUEL_MERCHANT_ID', $merchantID);
                 Configuration::updateValue('ROCKETFUEL_IFRAME', $rf_iframe);
-                Configuration::updateValue('ROCKETFUEL_MERCHANT_PUBLIC_KEY', $rf_signature);
+                Configuration::updateValue('ROCKETFUEL_MERCHANT_PUBLIC_KEY', $rf_pkey);
 
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             } else {

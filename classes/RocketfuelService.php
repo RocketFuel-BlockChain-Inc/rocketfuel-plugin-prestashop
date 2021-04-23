@@ -23,7 +23,7 @@ class RocketfuelService
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
-        $this->rf_signature = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
+        $this->rf_pkey = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
         $this->request = $request;
     }
 
@@ -184,7 +184,7 @@ class RocketfuelService
 
         $out = '';
 
-        $cert = $this->rf_signature;
+        $cert = $this->rf_pkey;
 
         $public_key = openssl_pkey_get_public($cert);
         $key_lenght = openssl_pkey_get_details($public_key);
