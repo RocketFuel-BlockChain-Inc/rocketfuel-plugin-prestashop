@@ -68,24 +68,10 @@ class RocketfuelService
     }
 
     /**
-     *  get serialized payload from order
+     * get serialized payload from order
      *
-     * {
-     * "cart":[{
-     * "id":"38",
-     * "name":"Beanie with Logo"
-     * "price":0.05,
-     * "quantity": 1
-     * },{
-     * "id":"22",
-     * "name":"Belt"
-     * "price":0.05,
-     * "quantity": 2
-     * }],
-     * "amount":0.133,
-     * "merchant_id":"b49e76e5-34a4-474e-9ab5-dad303f98891",
-     * "order":"374"
-     * }
+     * @param $order
+     * @return array
      */
     public function getOrderPayload($order)
     {
@@ -100,11 +86,11 @@ class RocketfuelService
                 'quantity' => $product['product_quantity']
             ];
         };
-        $shipping_total=$order->total_shipping;
-        if($shipping_total!=0){
+        $shipping_total = $order->total_shipping;
+        if ($shipping_total != 0) {
             $out['cart'][] = [
                 'id' => '',
-                'name' => 'Shipping: '.$order->getShipping()[0]['state_name'],
+                'name' => 'Shipping: ' . $order->getShipping()[0]['state_name'],
                 'price' => $shipping_total,
                 'quantity' => 1
             ];
@@ -113,7 +99,7 @@ class RocketfuelService
         $out['amount'] = $order->total_paid;
         $out['merchant_id'] = $this->merchant_id;
         $out['order'] = $order->id;
-        $out['encrypted'] = $this->getEncrypted($order->total_paid,  $order->id);
+        $out['encrypted'] = $this->getEncrypted($order->total_paid, $order->id);
 
         return $this->sortPayload($out);
     }
@@ -132,10 +118,10 @@ class RocketfuelService
         $keys = array_keys($payload);
         sort($keys);
 
-        foreach ($keys as $key){
-            if(is_bool($payload[$key])){
-                $sorted[$key] =$payload[$key];
-            }else{
+        foreach ($keys as $key) {
+            if (is_bool($payload[$key])) {
+                $sorted[$key] = $payload[$key];
+            } else {
                 $sorted[$key] = is_array($payload[$key]) ? $this->sortPayload($payload[$key]) : (string)$payload[$key];
             }
         }
@@ -202,8 +188,8 @@ class RocketfuelService
         $parts = str_split($to_crypt, $part_len);
         foreach ($parts as $part) {
             $encrypted_temp = '';
-            openssl_public_encrypt($part, $encrypted_temp, $public_key,OPENSSL_PKCS1_OAEP_PADDING);
-            $out .=  $encrypted_temp;
+            openssl_public_encrypt($part, $encrypted_temp, $public_key, OPENSSL_PKCS1_OAEP_PADDING);
+            $out .= $encrypted_temp;
         }
 
         return base64_encode($out);
