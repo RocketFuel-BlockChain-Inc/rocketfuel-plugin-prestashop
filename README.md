@@ -1,5 +1,5 @@
 # RocketFuel - RocketFuel Payment Method for Prestashop 1.7.x
-RocketFuel Payment Method for Prestashop 1.7.x
+RocketFuel Payment Method 0.1.3 for Prestashop 1.7.x
 
 The registration procedure is described in the [documentation RocketFuel](https://dev.rocketdemo.net/help)
 

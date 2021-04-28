@@ -100,6 +100,15 @@ class RocketfuelService
                 'quantity' => $product['product_quantity']
             ];
         };
+        $shipping_total=$order->total_shipping;
+        if($shipping_total!=0){
+            $out['cart'][] = [
+                'id' => '',
+                'name' => 'Shipping: '.$order->getShipping()[0]['state_name'],
+                'price' => $shipping_total,
+                'quantity' => 1
+            ];
+        }
 
         $out['amount'] = $order->total_paid;
         $out['merchant_id'] = $this->merchant_id;
