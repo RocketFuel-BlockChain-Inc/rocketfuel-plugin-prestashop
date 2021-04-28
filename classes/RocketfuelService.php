@@ -199,5 +199,13 @@ class RocketfuelService
 
         return base64_encode($out);
     }
-
+    /**
+     * @return string[]
+     */
+    public function checkCallback()
+    {
+        return [
+            'callback_status' => 'ok'
+        ];
+    }
 }

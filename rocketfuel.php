@@ -342,4 +342,5 @@ class RocketFuel extends PaymentModule
 
         return $payload;
     }
+
 }
