@@ -200,10 +200,10 @@
                 },
                 getUserData: function() {
                     let user_data = this.url.searchParams.get("user_data");
-
+console.log("user_data", user_data)
                     if (!user_data) return false;
 
-                    let user_json = atob(user_data);
+                    let user_json = atob(user_data.replace(' ', '+'));
 
                     return JSON.parse(user_json);
                 },

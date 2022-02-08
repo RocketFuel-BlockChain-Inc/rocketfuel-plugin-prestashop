@@ -122,15 +122,15 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
      * @param int $orderId
      * @return false|array
      */
-    public function processPayment($orderId, $cartObj,$customer)
+    public function processPayment($orderId, $cartObj, $customer)
     {
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
 
         $order = new Order($orderId);
+
         $currency = new Currency($order->id_currency);
 
-        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Order object : ' . "\n" . json_encode( $order) . "\n", FILE_APPEND);
-        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Cart object : ' . "\n" . json_encode($cartObj) . "\n", FILE_APPEND);
+
 
         $cart = $this->sortCart($cartObj->getProducts(true));
 
@@ -153,13 +153,13 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
                 'amount' => $order->getOrdersTotalPaid(),
                 'cart' => $cart,
                 'merchant_id' => Configuration::get('ROCKETFUEL_MERCHANT_ID'),
-                'currency' => "USD",
+                'currency' =>  $currency->iso_code,
                 'order' => (string) $orderId,
                 'redirectUrl' => ''
             )
         );
 
-
+        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Full data from payload : ' . "\n" . json_encode($data ) . "\n", FILE_APPEND);
         $curl = new Curl();
 
         $paymentResponse = $curl->processDataToRkfl($data);
