@@ -83,12 +83,14 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
 
         $result =  $this->processPayment($this->module->currentOrder, $cart, $customer);
 
-        file_put_contents(__DIR__ . '/log.json', "\n" . 'Final proces charge result : ' . "\n" . json_encode($result) . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Final proces charge result : ' . "\n" . json_encode($result) . "\n", FILE_APPEND);
 
         /**
          * Redirect the customer to the order confirmation page
          */
         Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int)$cart->id . '&id_module=' . (int)$this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key . $result['redirect']);
+        unset($cart);
+        unset($customer);
     }
     /**
      * Parse cart items and prepare for order
@@ -120,18 +122,22 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
      * @param int $orderId
      * @return false|array
      */
-    public function processPayment($orderId, $cartObj)
+    public function processPayment($orderId, $cartObj,$customer)
     {
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
 
         $order = new Order($orderId);
+        $currency = new Currency($order->id_currency);
+
+        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Order object : ' . "\n" . json_encode( $order) . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Cart object : ' . "\n" . json_encode($cartObj) . "\n", FILE_APPEND);
 
         $cart = $this->sortCart($cartObj->getProducts(true));
 
         $userData = base64_encode(json_encode(array(
-            'first_name' => '$order->get_billing_first_name()',
-            'last_name' => '$order->get_billing_last_name()',
-            'email' => '$order->get_billing_email()',
+            'first_name' => $customer->firstname,
+            'last_name' => $customer->lastname,
+            'email' => $customer->email,
             'merchant_auth' =>     '$this->merchant_auth()'
         )));
 
@@ -156,15 +162,17 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
 
         $curl = new Curl();
 
-        $paymentResponse = $curl->processPayment($data);
+        $paymentResponse = $curl->processDataToRkfl($data);
 
         unset($curl);
+        unset($order);
+        unset($currency);
 
         if (!$paymentResponse) {
             return;
         }
 
-        file_put_contents(__DIR__ . '/log.json', "\n" . 'Response from Process in validation : ' . "\n" . json_encode($paymentResponse) . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Response from Process in validation : ' . "\n" . json_encode($paymentResponse) . "\n", FILE_APPEND);
 
         $result = $paymentResponse;
 
