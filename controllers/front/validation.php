@@ -61,7 +61,6 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
         if (!Validate::isLoadedObject($customer)) {
 
             Tools::redirect('index.php?controller=order&step=1');
-
         }
 
         /**
@@ -125,7 +124,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
     public function processPayment($orderId, $cartObj, $customer)
     {
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
-
+ $merchantId = Configuration::get('ROCKETFUEL_MERCHANT_ID');
         $order = new Order($orderId);
 
         $currency = new Currency($order->id_currency);
@@ -138,7 +137,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             'first_name' => $customer->firstname,
             'last_name' => $customer->lastname,
             'email' => $customer->email,
-            'merchant_auth' =>     '$this->merchant_auth()'
+            'merchant_auth' =>     $this->merchant_auth($merchantId)
         )));
 
         $merchantCred = array(
@@ -152,14 +151,14 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             'body' => array(
                 'amount' => $order->getOrdersTotalPaid(),
                 'cart' => $cart,
-                'merchant_id' => Configuration::get('ROCKETFUEL_MERCHANT_ID'),
+                'merchant_id' => $merchantId,
                 'currency' =>  $currency->iso_code,
                 'order' => (string) $orderId,
                 'redirectUrl' => ''
             )
         );
 
-        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Full data from payload : ' . "\n" . json_encode($data ) . "\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Full data from payload : ' . "\n" . json_encode($data) . "\n", FILE_APPEND);
         $curl = new Curl();
 
         $paymentResponse = $curl->processDataToRkfl($data);
@@ -179,7 +178,6 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
         if (!isset($result->result) && !isset($result->result->url)) {
             // wc_add_notice(__('Failed to place order', 'rocketfuel-payment-gateway'), 'error');
             return array('succcess' => 'false');
-
         }
         $urlArr = explode('/', $result->result->url);
 
@@ -190,7 +188,6 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
         if ($this->environment !== 'prod') {
 
             $buildUrl .= '&env=' . $this->environment;
-
         }
         $buildUrl .=  "&user_data=" . $userData;
 
@@ -199,7 +196,47 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             'redirect' => $buildUrl
         );
     }
+    public function merchant_auth($merchantId)
+    {
+        return $this->get_encrypted($merchantId);
+    }
+    /**
+     * Encrypt Data
+     *
+     * @param $to_crypt string to encrypt
+     * @return string
+     */
+    public function get_encrypted($to_crypt)
+    {
 
+        $out = '';
+
+        $pub_key_path = dirname(__FILE__, 3) . '/key/.rf_public.key';
+
+        if (!file_exists($pub_key_path)) {
+            return false;
+        }
+        $cert = file_get_contents($pub_key_path);
+
+        $public_key = openssl_pkey_get_public($cert);
+
+        $key_lenght = openssl_pkey_get_details($public_key);
+
+        $part_len = $key_lenght['bits'] / 8 - 11;
+
+        $parts = str_split($to_crypt, $part_len);
+
+        foreach ($parts as $part) {
+
+            $encrypted_temp = '';
+
+            openssl_public_encrypt($part, $encrypted_temp, $public_key, OPENSSL_PKCS1_OAEP_PADDING);
+
+            $out .=  $encrypted_temp;
+        }
+
+        return base64_encode($out);
+    }
 
     /**
      * Get endpoint 

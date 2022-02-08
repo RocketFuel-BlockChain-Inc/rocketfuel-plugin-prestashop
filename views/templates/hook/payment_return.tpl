@@ -169,9 +169,10 @@
   <input type="hidden" name="rest_url" value="">
   <button id="rocketfuel_retrigger_payment_button">Rocketfuel</button>
   </div>
-  {if ($debug)}
-    {$payload}
-  {/if}
+ {* {if ($debug)}
+  *  {$payload}
+  *{/if} 
+  *}
 {/nocache}
 <script src="https://d3rpjm0wf8u2co.cloudfront.net/static/rkfl.js">
 
@@ -200,7 +201,7 @@
                 },
                 getUserData: function() {
                     let user_data = this.url.searchParams.get("user_data");
-console.log("user_data", user_data)
+
                     if (!user_data) return false;
 
                     let user_json = atob(user_data.replace(' ', '+'));
@@ -270,12 +271,13 @@ console.log("user_data", user_data)
                 },
                 prepareRetrigger: function() {
 
-                    //hide processing payment
-                    document.getElementById('rocketfuel_before_payment').style.cssText = "visibility:hidden;height:0;width:0";
+console.log("Button Close");
+
+                 
 
                     //show retrigger button
                     document.getElementById('rocketfuel_retrigger_payment_button').disabled = false;
-                    document.getElementById('rocketfuel_retrigger_payment').style.display = "block";
+      
                     // this.startPayment();
                 },
                 prepareProgressMessage: function() {
@@ -283,7 +285,7 @@ console.log("user_data", user_data)
                     //hide retrigger button
                     document.getElementById('rocketfuel_retrigger_payment_button').innerText = "Resume"; //revert trigger button message
 
-                    document.getElementById('rocketfuel_retrigger_payment').style.display = "none";
+               
                 },
 
                 windowListener: function() {
@@ -307,6 +309,9 @@ console.log("user_data", user_data)
 
                     })
                 },
+                  setLocalStorage: function(key,value){
+                    localStorage.setItem(key,value);
+                },
                 initRocketFuel: async function() {
                     return new Promise(async (resolve, reject) => {
                         if (!RocketFuel) {
@@ -321,7 +326,7 @@ console.log("user_data", user_data)
                             environment: RocketfuelPaymentEngine.getEnvironment()
                         });
 
-                        if (userData.first_name && userData.email) {
+                        if (userData.first_name && userData.email && userData.merchant_auth) {
                             payload = {
                                 firstName: userData.first_name,
                                 lastName: userData.last_name,
@@ -335,21 +340,25 @@ console.log("user_data", user_data)
 
 
                             try {
-                                // if (RocketfuelPaymentEngine.getEnvironment() !== 'prod') { //remove signon details when testing
+                                    if (userData.email !== localStorage.getItem('rkfl_email')) { //remove signon details when email is different
                                     localStorage.removeItem('rkfl_token');
                                     localStorage.removeItem('access');
-                                // }
+                             
+                                }
 
                                 rkflToken = localStorage.getItem('rkfl_token');
 
                                 if (!rkflToken) {
 
-                                    //response = await RocketfuelPaymentEngine.rkfl.rkflAutoSignUp(payload, RocketfuelPaymentEngine.getEnvironment());
+                                    response = await RocketfuelPaymentEngine.rkfl.rkflAutoSignUp(payload, RocketfuelPaymentEngine.getEnvironment());
+                              
+                                    RocketfuelPaymentEngine.setLocalStorage('rkfl_email', userData.email);
 
+                                    if (response) {
 
-                                    //if (response) {
-                                     //   rkflToken = response.result?.rkflToken;
-                                    //}
+                                        rkflToken = response.result?.rkflToken;
+
+                                    }
 
                                 }
 
@@ -359,18 +368,23 @@ console.log("user_data", user_data)
                                     environment: RocketfuelPaymentEngine.getEnvironment()
                                 }
                                 if (rkflToken) {
-                                    //rkflConfig.token = rkflToken;
+                                    rkflConfig.token = rkflToken;
                                 }
 
                                 console.log(rkflConfig);
 
                                 RocketfuelPaymentEngine.rkfl = new RocketFuel(rkflConfig);
+
                                 resolve(true);
+
                             } catch (error) {
+
                                 reject();
+
                             }
 
                         }
+
                         resolve('no auto');
                     })
 
@@ -386,7 +400,9 @@ console.log("user_data", user_data)
                         await engine.initRocketFuel();
 
                     } catch (error) {
-                        console.log('error from promise', error)
+
+                        console.log('error from promise', error);
+
                     }
 
                     console.log('Done initiating RKFL');
