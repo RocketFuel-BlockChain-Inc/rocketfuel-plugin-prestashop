@@ -159,4 +159,26 @@ class Callback{
         }
 
     }
+    public function updateOrder(){
+       
+        switch ($this->request->status) {
+            case '101':
+                $status = 'payment';
+                break;
+                case '1':
+                    $status = 'payment'; //Fix partial payment
+                    break;
+            case '-1':
+                $status = 'order_cancelled';
+            default:
+                break;
+        }
+        // var_dump((int)Configuration::get('PS_OS_PAYMENT'));
+        $history = new OrderHistory();
+        $history->id_order = $this->request->order_id;
+        $history->changeIdOrderState((int)Configuration::get('PS_OS_PAYMENT'), $history->id_order);
+        $history->addWithemail();
+        $history->save();
+        return $this->status;
+    }
 }
