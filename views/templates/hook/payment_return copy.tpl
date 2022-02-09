@@ -7,166 +7,163 @@
 
 <p>Complete payment using RocketFuel.</p>
 
-   <style>
-   #Rocketfuel{
+<style>
+    #Rocketfuel{
         display:block !important;
     }
-     #iframeWrapper{
+    .rocketfuel_process_payment {
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        align-items: baseline;
+    }
+
+    #rocketfuel_process_payment_button {
+        background-color: #229633;
+        border: #229633;
+    }
+
+    h3.indicate_text {
+        margin: 0;
+        font-size: 32px;
+        margin-right: 10px;
+        color: #fff;
+    }
+
+    .loader_rocket {
+        border: 1px solid #000000;
+        border-top: 1px solid #ffffff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 0.4s linear infinite;
+    }
+
+    .rocket_fuel_payment_overlay_wrapper {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-content: center;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    #rocket_fuel_payment_overlay_gateway {
+        width: 100%;
+        top: 0;
+        right: 0;
+        height: 100%;
+        z-index: 100000 !important;
+        
+        display: flex;
+    }
+
+    #iframeWrapper {
+        z-index: 100001 !important;
+    }
+
+    .rocket_fuel_payment_overlay_wrapper_gateway {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        align-content: center;
+
+    }
+
+    #rocketfuel_retrigger_payment button {
+        text-align: center;
+        
+        padding: 0px;
+        border: none;
+        width: 250px;
+        padding-bottom: 2px;
+        height: 48px;
+        font-size: 17px;
+        margin-top: 12px;
+        border-radius: 3px;
+        font-weight: 300;
+        color: #fff;
+        cursor: pointer;
+    }
+
+
+
+
+    #rocketfuel_retrigger_payment button:hover {
+        outline: none;
+        border: none;
+
+        background-color: #e26f02 !important;
+        border-color: #e26f02 !important;
+
+    }
+
+    .rocketfuel_exit_plan_wrapper {
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+    }
+
+    .rocketfuel_exit_plan_wrapper figure {
+        width: 14px;
+        height: 37px;
+        margin: 0;
+        right: 0px;
+        position: relative;
+        transition: right 700ms;
+        display: inline-block;
+
+    }
+
+    .proceed-forward-rkfl:hover figure {
+        right: -6px;
+        transition: right 200ms;
+    }
+
+    /* .rocketfuel_exit_plan_wrapper:hover a {
+        color: #ddd;
+    } */
+
+    .rocketfuel_exit_plan_wrapper a.completed-button-rkfl {
+        border: 1px solid #ffffff4d;
+        border-radius: 4px;
+        padding: 2px 10px;
+
+    }
+
+    .rocketfuel_exit_plan_wrapper a.proceed-forward-rkfl {
+        padding-right: 10px;
+    }
+
+    .rocketfuel_exit_plan_wrapper a {
+
+        text-decoration: none;
+        color: #fff !important;
+        font-size: 12px;
+
+    }
+
+    .rocketfuel_exit_plan_wrapper a:focus {
+        outline: none !important;
+        text-decoration: none !important;
+        background: transparent !important;
+    }
+    #iframeWrapper{
         position:fixed !important;
     }
-            .rocketfuel_process_payment {
-                text-align: center;
-                display: flex;
-                justify-content: center;
-                align-content: center;
-                align-items: baseline;
-            }
-
-            #rocketfuel_process_payment_button {
-                background-color: #229633;
-                border: #229633;
-            }
-
-            h3.indicate_text {
-                margin: 0;
-                font-size: 32px;
-                margin-right: 10px;
-                color: #fff;
-            }
-
-            .loader_rocket {
-                border: 1px solid #000000;
-                border-top: 1px solid #ffffff;
-                border-radius: 50%;
-                width: 20px;
-                height: 20px;
-                animation: spin 0.4s linear infinite;
-            }
-
-            .rocket_fuel_payment_overlay_wrapper {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                align-content: center;
-            }
-
-            @keyframes spin {
-                0% {
-                    transform: rotate(0deg);
-                }
-
-                100% {
-                    transform: rotate(360deg);
-                }
-            }
-
-            #rocket_fuel_payment_overlay_gateway {
-                width: 100%;
-                top: 0;
-                right: 0;
-                height: 100%;
-                z-index: 100000 !important;
-                position: fixed;
-                background: rgb(0 0 0 / 97%);
-                display: flex;
-            }
-
-            #iframeWrapper {
-                z-index: 100001 !important;
-            }
-
-            .rocket_fuel_payment_overlay_wrapper_gateway {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                align-content: center;
-                justify-content: center;
-            }
-
-            #rocketfuel_retrigger_payment button {
-                text-align: center;
-                background: #f0833c !important;
-                padding: 0px;
-                border: none;
-                width: 300px;
-                padding-bottom: 2px;
-                height: 48px;
-                font-size: 17px;
-                margin-top: 12px;
-                border-radius: 3px;
-                font-weight: 300;
-                color: #fff;
-                cursor: pointer;
-            }
-
-
-            #rocketfuel_retrigger_payment {
-                display: none;
-            }
-
-            #rocketfuel_retrigger_payment button:hover {
-                outline: none;
-                border: none;
-
-                background-color: #e26f02 !important;
-                border-color: #e26f02 !important;
-
-            }
-
-            .rocketfuel_exit_plan_wrapper {
-                display: flex;
-                text-align: center;
-                justify-content: center;
-                align-items: center;
-                margin-top: 30px;
-            }
-
-            .rocketfuel_exit_plan_wrapper figure {
-                width: 14px;
-                height: 37px;
-                margin: 0;
-                right: 0px;
-                position: relative;
-                transition: right 700ms;
-                display: inline-block;
-
-            }
-
-            .proceed-forward-rkfl:hover figure {
-                right: -6px;
-                transition: right 200ms;
-            }
-
-            /* .rocketfuel_exit_plan_wrapper:hover a {
-                color: #ddd;
-            } */
-
-            .rocketfuel_exit_plan_wrapper a.completed-button-rkfl {
-                border: 1px solid #ffffff4d;
-                border-radius: 4px;
-                padding: 2px 10px;
-
-            }
-
-            .rocketfuel_exit_plan_wrapper a.proceed-forward-rkfl {
-                padding-right: 10px;
-            }
-
-            .rocketfuel_exit_plan_wrapper a {
-
-                text-decoration: none;
-                color: #fff !important;
-                font-size: 12px;
-
-            }
-
-            .rocketfuel_exit_plan_wrapper a:focus {
-                outline: none !important;
-                text-decoration: none !important;
-                background: transparent !important;
-            }
-        </style>
+</style>
 {nocache}
  
   <input type="hidden" name="rest_url" value="">
@@ -300,21 +297,18 @@
 
                 },
                 prepareRetrigger: function() {
-                    //hide processing payment
-                    document.getElementById('rocketfuel_before_payment').style.cssText = "visibility:hidden;height:0;width:0";
 
                     //show retrigger button
                     document.getElementById('rocketfuel_retrigger_payment_button').disabled = false;
-                    document.getElementById('rocketfuel_retrigger_payment').style.display = "block";
+      
                     // this.startPayment();
                 },
                 prepareProgressMessage: function() {
-     //show processing payment
-                    document.getElementById('rocketfuel_before_payment').style.cssText = "visibility:visible;height:auto;width:auto";
+
                     //hide retrigger button
                     document.getElementById('rocketfuel_retrigger_payment_button').innerText = "Resume"; //revert trigger button message
 
-                  document.getElementById('rocketfuel_retrigger_payment').style.display = "none";
+               
                 },
 
                 windowListener: function() {
