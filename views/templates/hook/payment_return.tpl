@@ -190,8 +190,8 @@
 
 
                         <a onClick="RocketfuelPaymentEngine.showFinalOrderDetails()" class="proceed-forward-rkfl" style="display: flex;align-items: center;opacity:0.4">Go back
-                            &nbsp; <figure style="display: flex;">
-                           <!-- <img src="<?php echo esc_url(Plugin::get_url('assets/img/forward.svg')); ?>" alt="">-->
+                            &nbsp; <figure style="display: flex;align-content: center;align-items: center;">
+                           <img src="/modules/rocketfuel/assets/img/forward.svg" style="height:14px" alt="">
                         </figure>
                         </a>
                        

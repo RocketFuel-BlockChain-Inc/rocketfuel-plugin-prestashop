@@ -84,7 +84,9 @@
 
             //show retrigger button
             document.getElementById('rocketfuel_retrigger_payment_button').disabled = false;
-
+            document.getElementById('rocketfuel_retrigger_payment').style.display = 'block';
+            document.getElementById('rocketfuel_before_payment').style.display = 'none';
+            
             // this.startPayment();
         },
         prepareProgressMessage: function() {
@@ -92,7 +94,9 @@
             //hide retrigger button
             document.getElementById('rocketfuel_retrigger_payment_button').innerText = "Resume"; //revert trigger button message
 
-       
+            document.getElementById('rocketfuel_retrigger_payment').style.display = 'none';
+            document.getElementById('rocketfuel_before_payment').style.display = 'block';
+            
         },
 
         windowListener: function() {
