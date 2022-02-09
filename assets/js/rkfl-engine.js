@@ -36,20 +36,12 @@
 
                 console.log("orderId :", RocketfuelPaymentEngine.orderId);
 
-                let status = "ps-on-hold"; //change status
+   
                 let result_status = parseInt(result.status);
-                if (result_status == 101) {
-                    status = "wc-partial-payment"; //change status
-                }
-                if (result_status == 1 || result.status == "completed") {
-                    status = "admin_default"; //placeholder to get order status set by seller
-                }
-                if (result_status == -1) {
-                    status = "wc-failed"; //change status
-                }
+                
                 let fd = new FormData();
                 fd.append("order_id", RocketfuelPaymentEngine.orderId);
-                fd.append("status", status);
+                fd.append("status", result_status);
                 fetch(rest_url, {
                     method: "POST",
                     body: fd

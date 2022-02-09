@@ -171,7 +171,7 @@
         </style>
 {nocache}
  
-  <input type="hidden" name="rest_url" value="">
+  <input type="hidden" name="rest_url" value="/modules/rocketfuel/update-order.php">
  
   <div id="rocket_fuel_payment_overlay_gateway">
             <div class="rocket_fuel_payment_overlay_wrapper_gateway">
