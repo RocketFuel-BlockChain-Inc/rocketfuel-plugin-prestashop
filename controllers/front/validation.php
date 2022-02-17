@@ -11,6 +11,7 @@ require_once(dirname(__FILE__, 3) . '/classes/Curl.php');
 class RocketfuelValidationModuleFrontController extends ModuleFrontController
 {
     protected $environment;
+
     public function postProcess()
     {
 
@@ -82,8 +83,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
 
         $result =  $this->processPayment($this->module->currentOrder, $cart, $customer);
 
-        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Final proces charge result : ' . "\n" . json_encode($result) . "\n", FILE_APPEND);
-
+     
         /**
          * Redirect the customer to the order confirmation page
          */
@@ -96,7 +96,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
      * @param array $items 
      * @return array
      */
-    public function sortCart($items)
+    public function sortCart($items,$shippings)
     {
         $data = array();
         try {
@@ -107,6 +107,20 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
                     'price' => $item['total'],
                     'quantity' => (string)$item['cart_quantity']
                 );
+              
+            }
+  
+            if (isset($shippings) && is_array($shippings)) {
+                foreach ($shippings as $shipping) {
+                    $data[] = array(
+                        'name' => 'Shipping carrier: '.$shipping['carrier_name'],
+                        'id' => $shipping['id_order_invoice'],
+                        'price' =>$shipping['shipping_cost_tax_incl'],
+                        'quantity' => 1
+                    );
+                }
+               
+                
             }
         } catch (\Throwable $th) {
 
@@ -124,15 +138,16 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
     public function processPayment($orderId, $cartObj, $customer)
     {
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
- $merchantId = Configuration::get('ROCKETFUEL_MERCHANT_ID');
+        $merchantId = Configuration::get('ROCKETFUEL_MERCHANT_ID');
         $order = new Order($orderId);
+        
+        $shipping = $order->getShipping();
 
+     
         $currency = new Currency($order->id_currency);
 
-
-
-        $cart = $this->sortCart($cartObj->getProducts(true));
-
+        $cart = $this->sortCart($cartObj->getProducts(true), $shipping );
+      
         $userData = base64_encode(json_encode(array(
             'first_name' => $customer->firstname,
             'last_name' => $customer->lastname,
@@ -158,7 +173,8 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             )
         );
 
-        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Full data from payload : ' . "\n" . json_encode($data) . "\n", FILE_APPEND);
+        
+       
         $curl = new Curl();
 
         $paymentResponse = $curl->processDataToRkfl($data);
@@ -171,7 +187,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             return;
         }
 
-        file_put_contents(__DIR__ . '/debug.log', "\n" . 'Response from Process in validation : ' . "\n" . json_encode($paymentResponse) . "\n", FILE_APPEND);
+    
 
         $result = $paymentResponse;
 

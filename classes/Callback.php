@@ -4,8 +4,9 @@ use GuzzleHttp\Psr7\Response;
 
 //require_once(dirname(__FILE__) . '/../.public.php');
 
-class Callback{
-    
+class Callback
+{
+
     /**
      * Request data
      *
@@ -97,6 +98,7 @@ class Callback{
                 'price' => $product['total_price'],
                 'quantity' => $product['product_quantity']
             ];
+  
         };
 
         $out['amount'] = $order->total_paid;
@@ -130,9 +132,11 @@ class Callback{
      *
      * @return false|string
      */
-    public function getResponse()
+    public function getResponse($body)
     {
         $order = $this->validate();
+
+        $body = isset($this->request['data']['data']) ? $this->request['data']['data'] : '';
 
         $signature = $this->request['signature'];
 
@@ -140,12 +144,14 @@ class Callback{
             file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
         );
 
-        $verify = openssl_verify(
-            json_encode($this->getOrderPayload($order)),
-            base64_decode($signature),
-            $public_key,
-            'SHA256'
-        );
+        // $verify = openssl_verify(
+        //     $body ,
+        //     base64_decode($signature),
+        //     $public_key,
+        //     'SHA256'
+        // );
+
+        $verify = openssl_verify($body, base64_decode($signature),   $public_key, OPENSSL_ALGO_SHA256);
 
         if ($verify) {
             $this->makeOrderPayed($order);
@@ -157,7 +163,5 @@ class Callback{
                 'signature not valid'
             ]);
         }
-
     }
-  
 }

@@ -21,8 +21,7 @@ class Curl
             CURLOPT_TIMEOUT => 0,      CURLOPT_RETURNTRANSFER => true );
         
         $newOption =  $header + $default;
-        file_put_contents(__DIR__ . '/debug.log', "\n" . 'newOption: ' . "\n" . json_encode($newOption) . "\n", FILE_APPEND);
-
+  
         curl_setopt_array($this->curl, $newOption);
 
     }
@@ -92,8 +91,7 @@ class Curl
 
         $response = curl_exec($this->curl);
         
-        file_put_contents(__DIR__ . '/debug.log', "\n" . 'response: ' . "\n" . json_encode($response) . "\n", FILE_APPEND);
-        return $response;
+       return $response;
     }
 
     /**
