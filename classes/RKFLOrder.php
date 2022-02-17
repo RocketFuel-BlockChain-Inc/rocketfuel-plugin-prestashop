@@ -41,9 +41,7 @@ class RKFLOrder{
             default:
                 break;
         }
-        // var_dump((int)Configuration::get('PS_OS_PAYMENT'));
-      
-
+  
         $history = new OrderHistory();
         $history->id_order = $this->request['order_id'];
         $history->changeIdOrderState($status , $history->id_order);

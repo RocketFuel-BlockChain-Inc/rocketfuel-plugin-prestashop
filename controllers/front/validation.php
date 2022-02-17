@@ -138,7 +138,9 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
     public function processPayment($orderId, $cartObj, $customer)
     {
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
+
         $merchantId = Configuration::get('ROCKETFUEL_MERCHANT_ID');
+        
         $order = new Order($orderId);
         
         $shipping = $order->getShipping();
