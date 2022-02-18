@@ -113,7 +113,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             if (isset($shippings) && is_array($shippings)) {
                 foreach ($shippings as $shipping) {
                     $data[] = array(
-                        'name' => 'Shipping carrier: '.$shipping['carrier_name'],
+                        'name' => 'Shipping: '.$shipping['carrier_name'],
                         'id' => $shipping['id_order_invoice'],
                         'price' =>$shipping['shipping_cost_tax_incl'],
                         'quantity' => 1
