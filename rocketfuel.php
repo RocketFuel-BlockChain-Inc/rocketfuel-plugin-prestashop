@@ -37,7 +37,7 @@ class Rocketfuel extends PaymentModule
     {
         $this->name                   = 'rocketfuel';
         $this->tab                    = 'payments_gateways';
-        $this->version                = '1.0';
+        $this->version                = '1.0.0';
         $this->author                 = 'Rocketfuel Team';
         $this->controllers            = array('payment', 'validation');
         $this->currencies             = true;

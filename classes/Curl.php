@@ -1,5 +1,4 @@
 <?php
-
 class Curl
 {
 
@@ -38,16 +37,13 @@ class Curl
         $result = json_decode($response);
 
         if (!$result) {
-
             return array(
                 'success' => false,
                 'message' => 'Authorization cannot be completed'
             );
-
         }
 
         if (($result && $result->ok !== true) || !$result->result->access) {
-
             return false;
         }
 
@@ -68,7 +64,8 @@ class Curl
      * Process authentication
      * @param array $data
      */
-    public function auth($data){
+    public function auth($data)
+    {
 
         $this->curl = curl_init();
 

@@ -98,7 +98,6 @@ class Callback
                 'price' => $product['total_price'],
                 'quantity' => $product['product_quantity']
             ];
-  
         };
 
         $out['amount'] = $order->total_paid;
@@ -117,13 +116,16 @@ class Callback
     protected function sortPayload($payload)
     {
         $sorted = [];
-        if (is_object($payload))
+        if (is_object($payload)) {
             $payload = (array)$payload;
+        }
         $keys = array_keys($payload);
+
         sort($keys);
 
-        foreach ($keys as $key)
+        foreach ($keys as $key) {
             $sorted[$key] = is_array($payload[$key]) ? $this->sortPayload($payload[$key]) : (string)$payload[$key];
+        }
         return $sorted;
     }
 
@@ -141,7 +143,7 @@ class Callback
         $signature = $this->request['signature'];
 
         $public_key = openssl_pkey_get_public(
-            file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
+            Tools::file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
         );
 
         // $verify = openssl_verify(
@@ -151,7 +153,7 @@ class Callback
         //     'SHA256'
         // );
 
-        $verify = openssl_verify($body, base64_decode($signature),   $public_key, OPENSSL_ALGO_SHA256);
+        $verify = openssl_verify($body, base64_decode($signature), $public_key, OPENSSL_ALGO_SHA256);
 
         if ($verify) {
             $this->makeOrderPayed($order);

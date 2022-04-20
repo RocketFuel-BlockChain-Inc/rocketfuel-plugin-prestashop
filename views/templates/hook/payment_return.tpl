@@ -191,7 +191,7 @@
 
                         <a onClick="RocketfuelPaymentEngine.showFinalOrderDetails()" class="proceed-forward-rkfl" style="display: flex;align-items: center;opacity:0.4">Go back
                             &nbsp; <figure style="display: flex;align-content: center;align-items: center;">
-                           <img src="/modules/rocketfuel/assets/img/forward.svg" style="height:14px" alt="">
+                           <img src="/modules/rocketfuel/views/img/forward.svg" style="height:14px" alt="">
                         </figure>
                         </a>
                        
@@ -207,6 +207,6 @@
   *}
 {/nocache}
 
- <script src="/modules/rocketfuel/assets/js/rkfl-engine.js">
+ <script src="/modules/rocketfuel/views/js/rkfl-engine.js">
       
         </script>
