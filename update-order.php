@@ -1,7 +1,10 @@
 <?php
 /**
- * Process callbacks
+ * @author Blessing Udor
+ * @copyright 2010-2022 RocketFuel
+ * @license   LICENSE.txt
  */
+
 require_once(dirname(__FILE__) . '/../../config/config.inc.php');
 require_once(dirname(__FILE__) . '/../../init.php');
 require_once(dirname(__FILE__) . '/classes/RKFLOrder.php');

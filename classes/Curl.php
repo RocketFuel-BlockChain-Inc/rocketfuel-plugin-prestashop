@@ -21,14 +21,12 @@ class Curl
 
     protected function addHeader($header)
     {
-        $default = array( 
-            CURLOPT_RETURNTRANSFER => true, 
-            CURLOPT_TIMEOUT => 0,      CURLOPT_RETURNTRANSFER => true );
-        
+        $default = array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 0,      CURLOPT_RETURNTRANSFER => true);
         $newOption =  $header + $default;
   
         curl_setopt_array($this->curl, $newOption);
-
     }
     /**
      * Process data to get uuid
@@ -58,9 +56,7 @@ class Curl
         $charge_result = json_decode($charge_response);
 
         if (!$charge_result || $charge_result->ok === false) {
-
             return array('success' => false, 'message' => 'Could not establish an order: ' . $charge_result->message);
-
         }
 
         return json_decode($charge_response);
@@ -93,16 +89,14 @@ class Curl
         $this->addHeader($header);
 
         $response = curl_exec($this->curl);
-        
-       return $response;
+        return $response;
     }
 
     /**
      * Get UUID of the customer
-     * 
      * @param string $accessToken Access token for request
-     * @param array  $data        Request body
-     * 
+     * @param array  $data  Request body
+     *
      * @return array
      */
     public function createCharge($accessToken, $data)
