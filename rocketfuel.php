@@ -47,7 +47,7 @@ class Rocketfuel extends PaymentModule
         $this->description            = 'A Simple Payment module for Prestashop.';
         $this->confirmUninstall       = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
-
+        $this->module_key = 'cd2ac6c3b2a488dfed10c5aca3092cec';
         parent::__construct();
     }
     /**
