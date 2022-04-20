@@ -5,4 +5,4 @@
  * @license   LICENSE.txt
  */
 
- echo '';
+echo '';
