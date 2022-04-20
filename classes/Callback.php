@@ -1,9 +1,9 @@
 <?php
-use GuzzleHttp\Psr7\Response;
-
 /**
  * Callback Class for andling webhook
+ * @author Blessing Udor
  */
+
 class Callback
 {
     /**

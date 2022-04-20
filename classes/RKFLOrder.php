@@ -1,9 +1,8 @@
-
 <?php
-
 /**
  * Order class
  */
+
 class RKFLOrder{
     /**
      * Request data
