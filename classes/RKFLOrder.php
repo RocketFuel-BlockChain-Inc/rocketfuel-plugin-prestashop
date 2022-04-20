@@ -31,14 +31,14 @@ class RKFLOrder
         switch ($this->request['status']) {
             case '101':
                 $status = (int)Configuration::get('PS_OS_PAYMENT');
-            break;
+                break;
             case '1':
                 $status = (int)Configuration::get('PS_OS_PAYMENT'); //Fix partial payment
-            break;
+                break;
             case '-1':
             default:
-            $status = (int)Configuration::get('PS_OS_CANCELED');
-            break;
+                $status = (int)Configuration::get('PS_OS_CANCELED');
+                break;
         }
 
         $history = new OrderHistory();
