@@ -18,7 +18,7 @@
 
  *  @author    Udor Blessing
 
- *  @copyright 2010-2015 RocketFuel
+ *  @copyright 2010-2022 RocketFuel
 
  *  @license   LICENSE.txt
 

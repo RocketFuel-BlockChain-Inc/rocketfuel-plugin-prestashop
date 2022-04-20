@@ -1,12 +1,14 @@
 <?php
+/**
+ * Order class
+ */
 class Curl
 {
 
     public $curl;
 
     /**
-     * constructor.
-     * 
+     * The CURL Constructor
      */
     public function __construct()
     {

@@ -1,12 +1,11 @@
 <?php
-
 use GuzzleHttp\Psr7\Response;
 
-//require_once(dirname(__FILE__) . '/../.public.php');
-
+/**
+ * Callback Class for andling webhook
+ */
 class Callback
 {
-
     /**
      * Request data
      *
