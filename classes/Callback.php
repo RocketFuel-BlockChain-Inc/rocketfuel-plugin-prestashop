@@ -108,6 +108,26 @@ class Callback
         return $this->sortPayload($out);
     }
 
+    public function getCartPayload($order)
+    {
+        $out = [];
+
+        foreach ($order->getProducts() as $product) {
+            $out['cart'][] = [
+                'id' => $product['id_product'],
+                'name' => $product['name'],
+                'price' => $product['price'],
+                'quantity' => $product['cart_quantity']
+            ];
+        };
+
+        $out['amount'] = $order->getOrderTotal();
+        $out['merchant_id'] = $this->merchant_id;
+        $out['order'] = $order->id;
+
+        return $this->sortPayload($out);
+    }
+
     /**
      * custom serialize array
      *

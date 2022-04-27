@@ -58,8 +58,8 @@ class Rocketfuel extends PaymentModule
     public function install()
     {
         return parent::install()
-            && $this->registerHook('paymentOptions')
-            && $this->registerHook('paymentReturn');
+            && $this->registerHook('paymentOptions');
+            //&& $this->registerHook('paymentReturn');
     }
     /**
      * Uninstall this module and remove it from all hooks
@@ -145,18 +145,37 @@ class Rocketfuel extends PaymentModule
          *  Load form template to be displayed in the checkout step
          */
         $paymentForm = $this->fetch('module:rocketfuel/views/templates/hook/payment_options.tpl');
+        $orderID = $params['cart']->id;
+        //var_dump($params['objOrder']);
+
+        /**
+         * Load in the iframe to be displayed on click of the order button
+         */
+        $paymentIFrame = $this->fetch(
+            'module:rocketfuel/views/templates/hook/payment_return.tpl',
+            [
+                'iframe_url' => Configuration::get('ROCKETFUEL_IFRAME') ?: '',
+                'order_id' => $orderID,
+                'payload_url' => Context::getContext()->shop->getBaseURL(true).'modules/rocketfuel/order.php',
+                /**
+                 * for view payload in testing
+                 */
+                'debug' => true,
+                'cart' => json_encode($params['cart']),
+                'customer' => json_encode($this->getPayload($params['cart']->id_customer)),
+            ]
+        );
 
         /**
          * Create a PaymentOption object containing the necessary data
          * to display this module in the checkout
          */
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-
         $newOption->setModuleName($this->displayName)
-            ->setCallToActionText($this->trans('Pay with Crypto - Rocketfuel', [], 'Modules.Rocketfuel.Admin'))
-            // ->setCallToActionText($this->displayName)
+            ->setCallToActionText($this->displayName)
             ->setAction($formAction)
-            ->setForm($paymentForm);
+            ->setForm($paymentForm)
+            ->setAdditionalInformation($paymentIFrame);
 
         $payment_options = array(
             $newOption
@@ -359,13 +378,10 @@ class Rocketfuel extends PaymentModule
      * Get payload
      * @param int $orderID
      *
-     * @return array
+     * @return Customer
      */
     protected function getPayload($orderID)
     {
-        $callback = new Callback();
-        $payload = $callback->getOrderPayload(new Order($orderID));
-
-        return $payload;
+        return new Customer($orderID);
     }
 }
