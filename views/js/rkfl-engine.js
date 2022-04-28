@@ -34,6 +34,7 @@
 
         getUUID: function() {
             return this.url.searchParams.get("uuid");
+        
         },
         getEnvironment: function() {
             let environment = this.url.searchParams.get("env");

@@ -35,6 +35,7 @@ class Rocketfuel extends PaymentModule
      */
     public function __construct()
     {
+        $this->module_key             = 'cd2ac6c3b2a488dfed10c5aca3092cec';
         $this->name                   = 'rocketfuel';
         $this->tab                    = 'payments_gateways';
         $this->version                = '1.0.0';
@@ -47,7 +48,7 @@ class Rocketfuel extends PaymentModule
         $this->description            = 'A Simple Payment module for Prestashop.';
         $this->confirmUninstall       = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
-        $this->module_key = 'cd2ac6c3b2a488dfed10c5aca3092cec';
+      
         parent::__construct();
     }
     /**
@@ -134,7 +135,7 @@ class Rocketfuel extends PaymentModule
          * validation controller when the user finishes
          * the order process.
          */
-        $formAction = $this->context->link->getModuleLink($this->name, 'validation', array(), true);
+        $formAction = $this->context->link->getModuleLink($this->name, 'validation', array(), true );
 
         /**
          * Assign the url form action to the template var $action
