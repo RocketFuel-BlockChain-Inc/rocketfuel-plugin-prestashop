@@ -26,16 +26,16 @@
 
 document.addEventListener("DOMContentLoaded", function() {
     //select check to know when the terms checkbox is checked and the rocketfuel radio is chosen
-    let radio = document.querySelector("[data-data-module-name='Rocketfuel']")
+    let radio = document.querySelector("input[name='payment-option']")
     let butt = document.querySelector('.js-payment-confirmation .ps-shown-by-js')
     let butt_inner_html = butt.innerHTML
     function replace_button(rep){
         butt.innerHTML = rep;
     }
     let checkbox = document.getElementById("conditions_to_approve\[terms-and-conditions\]");
-    document.body.addEventListener('change', function (e) {
+    radio.addEventListener('change', function (e) {
         let target = e.target;
-        if (target.getAttribute('data-module-name') === "Rocketfuel"){
+        if (this.getAttribute('data-module-name') === "Rocketfuel"){
             if (checkbox.checked) {
                 replace_button(pay_button_enabled())
             }else {
@@ -47,12 +47,16 @@ document.addEventListener("DOMContentLoaded", function() {
     })
 
     checkbox.addEventListener('change', function (){
-        if (checkbox.checked){
+        if (this.checked){
             if (document.querySelector("[data-module-name='Rocketfuel']").checked){
-                replace_button(pay_button_enabled())
-            }
+                console.log('inside')
+                return replace_button(pay_button_enabled())
+            }/*else{
+                console.log('outside')
+                return replace_button(butt_inner_html)
+            }*/
         }else{
-            replace_button(butt_inner_html)
+            return replace_button(butt_inner_html)
         }
     })
 })
@@ -69,26 +73,49 @@ const RocketfuelPaymentEngine = {
     url: new URL(window.location.href),
     watchIframeShow: false,
 
-    orderId: function() {
-        return this.url.searchParams.get("id_order");
+    payLoad: function getPayload() {
+        let url = document.querySelector("input[name=payload_url]").value;
+        let payload;
+        //Get payload for rocketfuel cart
+        const request = new XMLHttpRequest();
+        request.open('GET', url, false);
+        request.addEventListener("readystatechange", () => {
+            if (request.readyState === 4 && request.status === 200) {
+                payload = JSON.parse(request.responseText)
+            }
+        });
+        request.send();
+        return payload;
     },
 
-    getUUID: function() {
-        return this.url.searchParams.get("uuid");
+    //cart_id
+    orderId: function() {
+        return this.payLoad().order;
     },
+
+    merchantAuth: function() {
+        return this.payLoad().merchant_auth;
+    },
+
+
+    getUUID: function() {
+        return this.payLoad().uuid;
+    },
+
     getEnvironment: function() {
-        let environment = this.url.searchParams.get("env");
+        let environment = this.payLoad().environment;
 
         return environment || 'prod';
     },
+
     getUserData: function() {
-        let user_data = this.url.searchParams.get("user_data");
+        let user_data = this.payLoad().customer;
 
         if (!user_data) return false;
 
-        let user_json = atob(user_data.replace(' ', '+'));
+        //let user_json = atob(user_data.replace(' ', '+'));
 
-        return JSON.parse(user_json);
+        return JSON.parse(user_data);
     },
     updateOrder: function(result) {
         try {
@@ -193,6 +220,7 @@ const RocketfuelPaymentEngine = {
                 reject();
             }
             let userData = RocketfuelPaymentEngine.getUserData();
+            let merchantAuth = RocketfuelPaymentEngine.merchantAuth();
             console.log(userData);
             let payload, response, rkflToken;
 
@@ -200,12 +228,13 @@ const RocketfuelPaymentEngine = {
                 environment: RocketfuelPaymentEngine.getEnvironment()
             });
 
-            if (userData.first_name && userData.email && userData.merchant_auth) {
+            if (userData.firstname && userData.email && merchantAuth) {
+                console.log('in')
                 payload = {
-                    firstName: userData.first_name,
-                    lastName: userData.last_name,
+                    firstName: userData.firstname,
+                    lastName: userData.lastname,
                     email: userData.email,
-                    merchantAuth: userData.merchant_auth,
+                    merchantAuth: merchantAuth,
                     kycType: 'null',
                     kycDetails: {
                         'DOB': "01-01-1990"

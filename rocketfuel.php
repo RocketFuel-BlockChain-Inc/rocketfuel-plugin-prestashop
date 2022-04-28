@@ -3,10 +3,10 @@
 /**
  * Rocketfuel Payment Gateway for Prestashop - A Simple Rocketfuel Payment Module for PrestaShop
  *
- * 
+ *
  *
  * @author Udor Blessing
- * 
+ *
  */
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -59,7 +59,7 @@ class Rocketfuel extends PaymentModule
     {
         return parent::install()
             && $this->registerHook('paymentOptions');
-            //&& $this->registerHook('paymentReturn');
+        //&& $this->registerHook('paymentReturn');
     }
     /**
      * Uninstall this module and remove it from all hooks

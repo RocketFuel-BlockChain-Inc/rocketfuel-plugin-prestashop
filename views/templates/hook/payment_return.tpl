@@ -191,6 +191,7 @@
 {nocache}
 
     <input type="hidden" name="rest_url" value="/modules/rocketfuel/update-order.php">
+    <input type="hidden" name="payload_url" value="{$payload_url}">
 
     <div id="rocket_fuel_payment_overlay_gateway" style="display: none">
         <div class="rocket_fuel_payment_overlay_wrapper_gateway">
@@ -210,7 +211,7 @@
 
                     <a onClick="RocketfuelPaymentEngine.showFinalOrderDetails()" class="proceed-forward-rkfl" style="display: flex;align-items: center;opacity:0.4">Go back
                         &nbsp; <figure style="display: flex;align-content: center;align-items: center;">
-                            <img src="/modules/rocketfuel/views/img/forward.svg" style="height:14px" alt="">
+                            <img src="modules/rocketfuel/views/img/forward.svg" style="height:14px" alt="">
                         </figure>
                     </a>
 
@@ -220,12 +221,11 @@
         </div>
     </div>
 
-    {* {if ($debug)}
-     *  {$payload}
-     *{/if}
-     *}
+    {if ($debug)}
+        {$payload_url}
+    {/if}
 {/nocache}
 
-<script src="/modules/rocketfuel/views/js/rkfl-engine.js">
+<script src="modules/rocketfuel/views/js/rkfl-engine.js">
 
 </script>

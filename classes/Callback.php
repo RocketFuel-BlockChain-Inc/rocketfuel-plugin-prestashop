@@ -20,11 +20,12 @@ class Callback
      *
      * @var string
      */
-    protected $merchant_id;
+    protected $merchant_id, $environment;
 
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
+        $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
         $this->request = $request;
     }
 
@@ -122,9 +123,11 @@ class Callback
         };
 
         $out['amount'] = $order->getOrderTotal();
-        $out['merchant_id'] = $this->merchant_id;
+        $out['merchant_auth'] = $this->get_encrypted($this->merchant_id);
+        $out['environment'] = $this->environment;
         $out['order'] = $order->id;
-
+        $out['uuid'] = $order->id.'-'.$order->id_customer.'-'.time();//this should be the cart_id-customer_id-time() for now
+        $out['customer'] = json_encode(new Customer($order->id_customer));
         return $this->sortPayload($out);
     }
 
@@ -186,5 +189,37 @@ class Callback
                 'signature not valid'
             ]);
         }
+    }
+
+    protected function get_encrypted($to_crypt)
+    {
+
+        $out = '';
+
+        $pub_key_path = dirname(__FILE__, 2) . '/key/.rf_public.key';
+
+        if (!file_exists($pub_key_path)) {
+            return false;
+        }
+        $cert = file_get_contents($pub_key_path);
+
+        $public_key = openssl_pkey_get_public($cert);
+
+        $key_lenght = openssl_pkey_get_details($public_key);
+
+        $part_len = $key_lenght['bits'] / 8 - 11;
+
+        $parts = str_split($to_crypt, $part_len);
+
+        foreach ($parts as $part) {
+
+            $encrypted_temp = '';
+
+            openssl_public_encrypt($part, $encrypted_temp, $public_key, OPENSSL_PKCS1_OAEP_PADDING);
+
+            $out .=  $encrypted_temp;
+        }
+
+        return base64_encode($out);
     }
 }
