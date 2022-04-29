@@ -19,9 +19,7 @@
  *  @author    Udor Blessing
 
  *  @copyright 2010-2022 RocketFuel
-
  *  @license   LICENSE.txt
-
  */
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -30,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let butt = document.querySelector('.js-payment-confirmation .ps-shown-by-js')
     let butt_inner_html = butt.innerHTML
     function replace_button(rep){
+        console.log("rei", rep);
         butt.innerHTML = rep;
     }
     let checkbox = document.getElementById("conditions_to_approve\[terms-and-conditions\]");
@@ -170,14 +169,15 @@ const RocketfuelPaymentEngine = {
         }, 500);
 
     },
-    prepareRetrigger: function() {
+    triggerPlaceOrder: function () {
+        // document.getElementById('place_order').style.display = 'inherit';
+        console.log('Trigger is calling');
 
-        //show retrigger button
-        document.getElementById('rocketfuel_retrigger_payment_button').disabled = false;
-        document.getElementById('rocketfuel_retrigger_payment').style.display = 'block';
-        document.getElementById('rocketfuel_before_payment').style.display = 'none';
+        $('form.checkout').trigger('submit');
 
-        // this.startPayment();
+        // document.getElementById('place_order').style.display = 'none';
+
+        console.log('Trigger has neen called ');
     },
     prepareProgressMessage: function() {
 
@@ -196,6 +196,10 @@ const RocketfuelPaymentEngine = {
             switch (event.data.type) {
                 case 'rocketfuel_iframe_close':
                     engine.prepareRetrigger();
+                         
+                        if (event.data.paymentCompleted === 1) {
+                            engine.triggerPlaceOrder();
+                        }
                     break;
                 case 'rocketfuel_new_height':
                     if (engine.watchIframeShow) {

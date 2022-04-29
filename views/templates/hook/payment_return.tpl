@@ -1,28 +1,3 @@
-/**
-
-* NOTICE OF LICENSE
-
-*
-
-* This file is licenced under the Software License Agreement.
-
-* With the purchase or the installation of the software in your application
-
-* you accept the licence agreement.
-
-*
-
-* You must not modify, adapt or create derivative works of this source code
-
-*
-
-*  @author    Udor Blessing
-
-*  @copyright 2010-2022 RocketFuel
-
-*  @license   LICENSE.txt
-
-*/
 <script src="https://d3rpjm0wf8u2co.cloudfront.net/static/rkfl.js">
 
 </script>
@@ -89,7 +64,7 @@
         height: 100%;
         z-index: 100000 !important;
         position: fixed;
-        background: rgb(0 0 0 / 97%);
+    
         display: flex;
     }
 
@@ -197,7 +172,7 @@
         <div class="rocket_fuel_payment_overlay_wrapper_gateway">
             <div id="rocketfuel_before_payment">
                 <div class="rocketfuel_process_payment">
-                    <h3 class="indicate_text">Processing Payment</h3> <span>
+                    <h3 class="indicate_text">Processing</h3> <span>
                             <div class="loader_rocket"></div>
                         </span>
                 </div>
@@ -221,9 +196,7 @@
         </div>
     </div>
 
-    {if ($debug)}
-        {$payload_url}
-    {/if}
+   
 {/nocache}
 
 <script src="modules/rocketfuel/views/js/rkfl-engine.js">
