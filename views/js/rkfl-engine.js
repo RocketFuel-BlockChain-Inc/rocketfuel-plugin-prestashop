@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let butt = document.querySelector('.js-payment-confirmation .ps-shown-by-js')
     let butt_inner_html = butt.innerHTML
     function replace_button(rep){
-        console.log("rei", rep);
+  
         butt.innerHTML = rep;
     }
     let checkbox = document.getElementById("conditions_to_approve\[terms-and-conditions\]");

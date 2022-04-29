@@ -1,3 +1,27 @@
+{**
+
+ * NOTICE OF LICENSE
+
+ *
+
+ * This file is licenced under the Software License Agreement.
+
+ * With the purchase or the installation of the software in your application
+
+ * you accept the licence agreement.
+
+ *
+
+ * You must not modify, adapt or create derivative works of this source code
+
+ *
+
+ *  @author    Udor Blessing
+
+ *  @copyright 2010-2022 RocketFuel
+ *  @license   LICENSE.txt
+ *}
+
 <script src="https://d3rpjm0wf8u2co.cloudfront.net/static/rkfl.js">
 
 </script>
@@ -169,31 +193,7 @@
     <input type="hidden" name="payload_url" value="{$payload_url}">
 
     <div id="rocket_fuel_payment_overlay_gateway" style="display: none">
-        <div class="rocket_fuel_payment_overlay_wrapper_gateway">
-            <div id="rocketfuel_before_payment">
-                <div class="rocketfuel_process_payment">
-                    <h3 class="indicate_text">Processing</h3> <span>
-                            <div class="loader_rocket"></div>
-                        </span>
-                </div>
-            </div>
-            <div id="rocketfuel_retrigger_payment">
-                <button id="rocketfuel_retrigger_payment_button">
-                    Rocketfuel
-                </button>
-                <div class="rocketfuel_exit_plan_wrapper">
-
-
-                    <a onClick="RocketfuelPaymentEngine.showFinalOrderDetails()" class="proceed-forward-rkfl" style="display: flex;align-items: center;opacity:0.4">Go back
-                        &nbsp; <figure style="display: flex;align-content: center;align-items: center;">
-                            <img src="modules/rocketfuel/views/img/forward.svg" style="height:14px" alt="">
-                        </figure>
-                    </a>
-
-
-                </div>
-            </div>
-        </div>
+     
     </div>
 
    
