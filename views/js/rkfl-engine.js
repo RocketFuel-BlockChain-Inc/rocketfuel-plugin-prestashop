@@ -173,11 +173,11 @@ const RocketfuelPaymentEngine = {
         // document.getElementById('place_order').style.display = 'inherit';
         console.log('Trigger is calling');
 
-        $('form.checkout').trigger('submit');
+        // $('form.checkout').trigger('submit');
 
         // document.getElementById('place_order').style.display = 'none';
 
-        console.log('Trigger has neen called ');
+     
     },
     prepareProgressMessage: function() {
 
