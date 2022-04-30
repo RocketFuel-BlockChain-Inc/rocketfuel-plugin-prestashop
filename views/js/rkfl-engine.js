@@ -278,7 +278,7 @@ const RocketfuelPaymentEngine = {
                         rkflConfig.token = rkflToken;
                     }
 
-                    console.log(rkflConfig);
+                    console.log({rkflConfig});
 
                     RocketfuelPaymentEngine.rkfl = new RocketFuel(rkflConfig);
 
