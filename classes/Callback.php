@@ -129,8 +129,8 @@ class Callback
             'cred' => $this->merchantCred(),
             'endpoint' => $this->getEndpoint($this->environment),
             'body' => [
-                'amount' => $order->getOrderTotal(),
-                'cart' => $order,//cart
+                'amount' => (string)$order->getOrderTotal(),
+                'cart' => $out['cart'], //$order,//cart
                 'merchant_id' => $this->merchant_id,
                 'currency' =>  $currency->iso_code,
                 'order' => (string) $order->id,//cart id
@@ -138,7 +138,7 @@ class Callback
             ]
         ];
 
-        $out['amount'] = $order->getOrderTotal();
+        $out['amount'] = (string)$order->getOrderTotal();
         $out['merchant_auth'] = $this->get_encrypted($this->merchant_id);
         $out['environment'] = $this->environment;
         $out['order'] = $order->id;
@@ -242,8 +242,9 @@ class Callback
     protected function get_uuid($data)
     {
         $curl = new Curl();
-
+file_put_contents(__DIR__.'/log.json',json_encode($data),FILE_APPEND);
         $paymentResponse = $curl->processDataToRkfl($data);
+        file_put_contents(__DIR__.'/response.json',json_encode($paymentResponse),FILE_APPEND);
 
         unset($curl);
 
