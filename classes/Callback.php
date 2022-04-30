@@ -1,7 +1,8 @@
 <?php
 /**
  * Callback Class for andling webhook
- * @author Blessing Udor
+ * 
+ * @author Blessing Udor<reachme@blessingudor.com>
  * @copyright 2010-2022 RocketFuel
  * @license   LICENSE.txt
  */
@@ -133,7 +134,7 @@ class Callback
                 'cart' => $out['cart'], //$order,//cart
                 'merchant_id' => $this->merchant_id,
                 'currency' =>  $currency->iso_code,
-                'order' => (string) $order->id,//cart id
+                'order' => (string) $order->id.' '.time(),//cart id
                 'redirectUrl' => ''
             ]
         ];
