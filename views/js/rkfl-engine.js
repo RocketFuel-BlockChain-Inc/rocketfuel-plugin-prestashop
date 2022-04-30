@@ -32,9 +32,9 @@ document.addEventListener("DOMContentLoaded", function() {
         butt.innerHTML = rep;
     }
     let checkbox = document.getElementById("conditions_to_approve\[terms-and-conditions\]");
-    radio.addEventListener('change', function (e) {
+    document.body.addEventListener('change', function (e) {
         let target = e.target;
-        if (this.getAttribute('data-module-name') === "Rocketfuel"){
+        if (target.getAttribute('data-module-name') === "Rocketfuel"){
             if (checkbox.checked) {
                 replace_button(pay_button_enabled())
             }else {
@@ -43,12 +43,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }else{
             replace_button(butt_inner_html)
         }
-    })
 
-    checkbox.addEventListener('change', function (){
-        if (this.checked){
+        if (checkbox.checked){
             if (document.querySelector("[data-module-name='Rocketfuel']").checked){
-                console.log('inside')
                 return replace_button(pay_button_enabled())
             }/*else{
                 console.log('outside')

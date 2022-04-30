@@ -6,6 +6,7 @@
  * @license   LICENSE.txt
  */
 
+require_once(dirname(__FILE__, 2) . '/classes/Curl.php');
 class Callback
 {
     /**
@@ -122,11 +123,26 @@ class Callback
             ];
         };
 
+        $currency = new Currency(Context::getContext()->cookie->id_currency);
+
+        $data = [
+            'cred' => $this->merchantCred(),
+            'endpoint' => $this->getEndpoint($this->environment),
+            'body' => [
+                'amount' => $order->getOrderTotal(),
+                'cart' => $order,//cart
+                'merchant_id' => $this->merchant_id,
+                'currency' =>  $currency->iso_code,
+                'order' => (string) $order->id,//cart id
+                'redirectUrl' => ''
+            ]
+        ];
+
         $out['amount'] = $order->getOrderTotal();
         $out['merchant_auth'] = $this->get_encrypted($this->merchant_id);
         $out['environment'] = $this->environment;
         $out['order'] = $order->id;
-        $out['uuid'] = $order->id.'-'.$order->id_customer.'-'.time();//this should be the cart_id-customer_id-time() for now
+        $out['uuid'] = $this->get_uuid($data);
         $out['customer'] = json_encode(new Customer($order->id_customer));
         return $this->sortPayload($out);
     }
@@ -221,5 +237,50 @@ class Callback
         }
 
         return base64_encode($out);
+    }
+
+    protected function get_uuid($data)
+    {
+        $curl = new Curl();
+
+        $paymentResponse = $curl->processDataToRkfl($data);
+
+        unset($curl);
+
+        if (!$paymentResponse) {
+            return false;
+        }
+
+
+
+        $result = $paymentResponse;
+
+        if (!isset($result->result) && !isset($result->result->url)) {
+            // wc_add_notice(__('Failed to place order', 'rocketfuel-payment-gateway'), 'error');
+            return array('succcess' => 'false');
+        }
+        $urlArr = explode('/', $result->result->url);
+
+        return $urlArr[count($urlArr) - 1];
+    }
+
+    public function getEndpoint($environment)
+    {
+        $environmentData = [
+            'prod' => 'https://app.rocketfuelblockchain.com/api',
+            'dev' => 'https://dev-app.rocketdemo.net/api',
+            'stage2' => 'https://qa-app.rocketdemo.net/api',
+            'preprod' => 'https://preprod-app.rocketdemo.net/api',
+        ];
+
+        return isset($environmentData[$environment]) ? $environmentData[$environment] : 'https://app.rocketfuelblockchain.com/api';
+    }
+
+    public function merchantCred()
+    {
+        return [
+            'email' => Configuration::get('ROCKETFUEL_MERCHANT_EMAIL'),
+            'password' => Configuration::get('ROCKETFUEL_MERCHANT_PASSWORD')
+        ];
     }
 }
