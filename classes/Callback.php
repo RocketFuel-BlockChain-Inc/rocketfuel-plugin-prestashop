@@ -1,11 +1,14 @@
 <?php
+/**
+ * Callback Class for andling webhook
+ * @author Blessing Udor
+ * @copyright 2010-2022 RocketFuel
+ * @license   LICENSE.txt
+ */
 
-use GuzzleHttp\Psr7\Response;
-
-//require_once(dirname(__FILE__) . '/../.public.php');
-
-class Callback{
-    
+require_once(dirname(__FILE__, 2) . '/classes/Curl.php');
+class Callback
+{
     /**
      * Request data
      *
@@ -18,11 +21,12 @@ class Callback{
      *
      * @var string
      */
-    protected $merchant_id;
+    protected $merchant_id, $environment;
 
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
+        $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
         $this->request = $request;
     }
 
@@ -106,6 +110,43 @@ class Callback{
         return $this->sortPayload($out);
     }
 
+    public function getCartPayload($order)
+    {
+        $out = [];
+
+        foreach ($order->getProducts() as $product) {
+            $out['cart'][] = [
+                'id' => $product['id_product'],
+                'name' => $product['name'],
+                'price' => $product['price'],
+                'quantity' => $product['cart_quantity']
+            ];
+        };
+
+        $currency = new Currency(Context::getContext()->cookie->id_currency);
+
+        $data = [
+            'cred' => $this->merchantCred(),
+            'endpoint' => $this->getEndpoint($this->environment),
+            'body' => [
+                'amount' => $order->getOrderTotal(),
+                'cart' => $order,//cart
+                'merchant_id' => $this->merchant_id,
+                'currency' =>  $currency->iso_code,
+                'order' => (string) $order->id,//cart id
+                'redirectUrl' => ''
+            ]
+        ];
+
+        $out['amount'] = $order->getOrderTotal();
+        $out['merchant_auth'] = $this->get_encrypted($this->merchant_id);
+        $out['environment'] = $this->environment;
+        $out['order'] = $order->id;
+        $out['uuid'] = $this->get_uuid($data);
+        $out['customer'] = json_encode(new Customer($order->id_customer));
+        return $this->sortPayload($out);
+    }
+
     /**
      * custom serialize array
      *
@@ -115,13 +156,16 @@ class Callback{
     protected function sortPayload($payload)
     {
         $sorted = [];
-        if (is_object($payload))
+        if (is_object($payload)) {
             $payload = (array)$payload;
+        }
         $keys = array_keys($payload);
+
         sort($keys);
 
-        foreach ($keys as $key)
+        foreach ($keys as $key) {
             $sorted[$key] = is_array($payload[$key]) ? $this->sortPayload($payload[$key]) : (string)$payload[$key];
+        }
         return $sorted;
     }
 
@@ -130,22 +174,26 @@ class Callback{
      *
      * @return false|string
      */
-    public function getResponse()
+    public function getResponse($body)
     {
         $order = $this->validate();
+
+        $body = isset($this->request['data']['data']) ? $this->request['data']['data'] : '';
 
         $signature = $this->request['signature'];
 
         $public_key = openssl_pkey_get_public(
-            file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
+            Tools::file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
         );
 
-        $verify = openssl_verify(
-            json_encode($this->getOrderPayload($order)),
-            base64_decode($signature),
-            $public_key,
-            'SHA256'
-        );
+        // $verify = openssl_verify(
+        //     $body ,
+        //     base64_decode($signature),
+        //     $public_key,
+        //     'SHA256'
+        // );
+
+        $verify = openssl_verify($body, base64_decode($signature), $public_key, OPENSSL_ALGO_SHA256);
 
         if ($verify) {
             $this->makeOrderPayed($order);
@@ -157,6 +205,82 @@ class Callback{
                 'signature not valid'
             ]);
         }
+    }
 
+    protected function get_encrypted($to_crypt)
+    {
+
+        $out = '';
+
+        $pub_key_path = dirname(__FILE__, 2) . '/key/.rf_public.key';
+
+        if (!file_exists($pub_key_path)) {
+            return false;
+        }
+        $cert = file_get_contents($pub_key_path);
+
+        $public_key = openssl_pkey_get_public($cert);
+
+        $key_lenght = openssl_pkey_get_details($public_key);
+
+        $part_len = $key_lenght['bits'] / 8 - 11;
+
+        $parts = str_split($to_crypt, $part_len);
+
+        foreach ($parts as $part) {
+
+            $encrypted_temp = '';
+
+            openssl_public_encrypt($part, $encrypted_temp, $public_key, OPENSSL_PKCS1_OAEP_PADDING);
+
+            $out .=  $encrypted_temp;
+        }
+
+        return base64_encode($out);
+    }
+
+    protected function get_uuid($data)
+    {
+        $curl = new Curl();
+
+        $paymentResponse = $curl->processDataToRkfl($data);
+
+        unset($curl);
+
+        if (!$paymentResponse) {
+            return false;
+        }
+
+
+
+        $result = $paymentResponse;
+
+        if (!isset($result->result) && !isset($result->result->url)) {
+            // wc_add_notice(__('Failed to place order', 'rocketfuel-payment-gateway'), 'error');
+            return array('succcess' => 'false');
+        }
+        $urlArr = explode('/', $result->result->url);
+
+        return $urlArr[count($urlArr) - 1];
+    }
+
+    public function getEndpoint($environment)
+    {
+        $environmentData = [
+            'prod' => 'https://app.rocketfuelblockchain.com/api',
+            'dev' => 'https://dev-app.rocketdemo.net/api',
+            'stage2' => 'https://qa-app.rocketdemo.net/api',
+            'preprod' => 'https://preprod-app.rocketdemo.net/api',
+        ];
+
+        return isset($environmentData[$environment]) ? $environmentData[$environment] : 'https://app.rocketfuelblockchain.com/api';
+    }
+
+    public function merchantCred()
+    {
+        return [
+            'email' => Configuration::get('ROCKETFUEL_MERCHANT_EMAIL'),
+            'password' => Configuration::get('ROCKETFUEL_MERCHANT_PASSWORD')
+        ];
     }
 }

@@ -3,10 +3,10 @@
 /**
  * Rocketfuel Payment Gateway for Prestashop - A Simple Rocketfuel Payment Module for PrestaShop
  *
- * 
+ *
  *
  * @author Udor Blessing
- * 
+ *
  */
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -37,7 +37,7 @@ class Rocketfuel extends PaymentModule
     {
         $this->name                   = 'rocketfuel';
         $this->tab                    = 'payments_gateways';
-        $this->version                = '1.0';
+        $this->version                = '1.0.0';
         $this->author                 = 'Rocketfuel Team';
         $this->controllers            = array('payment', 'validation');
         $this->currencies             = true;
@@ -47,7 +47,7 @@ class Rocketfuel extends PaymentModule
         $this->description            = 'A Simple Payment module for Prestashop.';
         $this->confirmUninstall       = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
-
+        $this->module_key = 'cd2ac6c3b2a488dfed10c5aca3092cec';
         parent::__construct();
     }
     /**
@@ -58,8 +58,8 @@ class Rocketfuel extends PaymentModule
     public function install()
     {
         return parent::install()
-            && $this->registerHook('paymentOptions')
-            && $this->registerHook('paymentReturn');
+            && $this->registerHook('paymentOptions');
+        //&& $this->registerHook('paymentReturn');
     }
     /**
      * Uninstall this module and remove it from all hooks
@@ -145,18 +145,37 @@ class Rocketfuel extends PaymentModule
          *  Load form template to be displayed in the checkout step
          */
         $paymentForm = $this->fetch('module:rocketfuel/views/templates/hook/payment_options.tpl');
+        $orderID = $params['cart']->id;
+        //var_dump($params['objOrder']);
+
+        /**
+         * Load in the iframe to be displayed on click of the order button
+         */
+        $paymentIFrame = $this->fetch(
+            'module:rocketfuel/views/templates/hook/payment_return.tpl',
+            [
+                'iframe_url' => Configuration::get('ROCKETFUEL_IFRAME') ?: '',
+                'order_id' => $orderID,
+                'payload_url' => Context::getContext()->shop->getBaseURL(true).'modules/rocketfuel/order.php',
+                /**
+                 * for view payload in testing
+                 */
+                'debug' => true,
+                'cart' => json_encode($params['cart']),
+                'customer' => json_encode($this->getPayload($params['cart']->id_customer)),
+            ]
+        );
 
         /**
          * Create a PaymentOption object containing the necessary data
          * to display this module in the checkout
          */
         $newOption = new PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-
         $newOption->setModuleName($this->displayName)
-            ->setCallToActionText($this->trans('Pay with Crypto - Rocketfuel', [], 'Modules.Rocketfuel.Admin'))
-            // ->setCallToActionText($this->displayName)
+            ->setCallToActionText($this->displayName)
             ->setAction($formAction)
-            ->setForm($paymentForm);
+            ->setForm($paymentForm)
+            ->setAdditionalInformation($paymentIFrame);
 
         $payment_options = array(
             $newOption
@@ -164,7 +183,6 @@ class Rocketfuel extends PaymentModule
 
         return $payment_options;
     }
-
     /**
      * Display a message in the paymentReturn hook
      *
@@ -353,20 +371,17 @@ class Rocketfuel extends PaymentModule
      */
     protected function getCallbackUrl()
     {
-        return 'https://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/callback.php';
+        return 'https://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/api/callback.php';
     }
 
     /**
      * Get payload
      * @param int $orderID
      *
-     * @return array
+     * @return Customer
      */
     protected function getPayload($orderID)
     {
-        $callback = new Callback();
-        $payload = $callback->getOrderPayload(new Order($orderID));
-
-        return $payload;
+        return new Customer($orderID);
     }
 }
