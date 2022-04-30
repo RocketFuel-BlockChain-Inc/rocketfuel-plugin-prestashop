@@ -36,76 +36,76 @@
         defaultSubmitBtn = document.querySelector('.js-payment-confirmation .ps-shown-by-js').querySelector('button.btn.btn-primary');
 
         const rkflSubmitButton = document.createElement('a');
-        
-        rkflSubmitButton.addEventListener('click', (e)=>{
+
+        rkflSubmitButton.addEventListener('click', (e) => {
             pay(e);
         })
 
         rkflSubmitButton.id = 'rkfl-pay-btn';
-        
+
         rkflSubmitButton.innerText = 'Pay with Rocketfuel';
 
         let classes = ['btn', 'btn-primary', 'rkfl-pay-btn'];
-        console.log({classes})
+        console.log({ classes })
         classes.forEach(clas =>
             rkflSubmitButton.classList.add(clas))
 
         rkflSubmitButton.style.display = 'none';
 
-        document.querySelector('#payment-confirmation button[type=submit]').parentElement.appendChild(rkflSubmitButton);
+        document.querySelector('#payment-confirmation button[type=submit]').parentElement.prepend(rkflSubmitButton);
 
         replaceButton = function (rep) {
 
             butt.innerHTML = rep;
         }
         function switchSubmitBtn(activeRkfl = false) {
-            
+
             if (activeRkfl) {
                 document.getElementById('rkfl-pay-btn').style.display = 'block';
-                console.log({activeRkfl},"activeRkfl", document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary'));
+                console.log({ activeRkfl }, "activeRkfl", document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary'));
 
-          
+
 
                 document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary').style.display = 'none';
-
-                console.log({activeRkfl},"activeRkfl", document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary'));
+                document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary').style.visibility = 'hidden';
+                console.log({ activeRkfl }, "activeRkfl", document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary'));
             } else {
 
-                console.log({activeRkfl},"ELSE --------------------->>>>>>>>>>> activeRkfl", document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary'));
+                console.log({ activeRkfl }, "ELSE --------------------->>>>>>>>>>> activeRkfl", document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary'));
 
                 document.getElementById('rkfl-pay-btn').style.display = 'none';
-                document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary').style.display = 'block'
+                document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary').style.visibility = 'initial'
             }
 
         }
         let checkbox = document.getElementById("conditions_to_approve\[terms-and-conditions\]");
         document.getElementById('checkout-payment-step').addEventListener('change', function (e) {
             let target = e.target;
-            if(checkbox.checked){
+            if (checkbox.checked) {
                 if (target.getAttribute('data-module-name') === "Rocketfuel") {
-                
-                        console.log('switchSubmitBtn is called')
-                        switchSubmitBtn(true);
-               
+
+                    console.log('switchSubmitBtn is called')
+                    switchSubmitBtn(true);
+
                 } else {
-                    if(document.querySelector('input[data-module-name=Rocketfuel]').checked === true){
+                    if (document.querySelector('input[data-module-name=Rocketfuel]').checked === true) {
                         console.log('switchSubmitBtn is called')
-                        
+
                         switchSubmitBtn(true);
-                    }else{
- 
+                    } else {
+
                         console.log('switchSubmitBtn is called')
-    
+
                         switchSubmitBtn();
                     }
-                   
-                
+
+
                 }
-            }else{
+            } else {
                 switchSubmitBtn();
             }
-            
- 
+
+
         })
     })
 
@@ -225,7 +225,7 @@
             console.log('Trigger Place order is called');
 
             // replaceButton(defaultSubmitBtn);
-
+            // switchSubmitBtn();
             // document.querySelector('.js-payment-confirmation .ps-shown-by-js').click();
             document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary').click();
 
