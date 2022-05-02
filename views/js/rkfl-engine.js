@@ -26,6 +26,11 @@
 
     let replaceButton;
     let defaultSubmitBtn;
+    
+    localStorage.removeItem('rocketfuel-presta-order-status');
+    
+    localStorage.removeItem('rocketfuel-presta-temporary-order');
+
     document.addEventListener("DOMContentLoaded", function () {
         //select check to know when the terms checkbox is checked and the rocketfuel radio is chosen
         let radio = document.querySelector("input[name='payment-option']");
@@ -79,6 +84,7 @@
 
         }
         let checkbox = document.getElementById("conditions_to_approve\[terms-and-conditions\]");
+        
         document.getElementById('checkout-payment-step').addEventListener('change', function (e) {
             let target = e.target;
             if (checkbox.checked) {
@@ -109,13 +115,7 @@
         })
     })
 
-    function payButton() {
-        return "<a href='#' class='btn btn-secondary disabled-link'>Pay with rocketfuel </a>"
-    }
 
-    function payButtonEnabled() {
-        return "<a href='#' class='btn btn-primary' onclick='return pay()'>Pay with rocketfuel </a>"
-    }
     const RocketfuelPaymentEngine = {
 
         url: new URL(window.location.href),
@@ -177,7 +177,7 @@
                 console.log("orderId :", RocketfuelPaymentEngine.orderId());
                 let result_status = parseInt(result.status);
 
-                localStorage.setItem('rocketfuel-presta-order-status', result_status)
+                localStorage.setItem('rocketfuel-presta-order-status', result_status);
                 localStorage.setItem('rocketfuel-presta-temporary-order', RocketfuelPaymentEngine.orderId())
 
 

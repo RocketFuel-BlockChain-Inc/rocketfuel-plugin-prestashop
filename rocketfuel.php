@@ -152,7 +152,7 @@ class Rocketfuel extends PaymentModule
          * Load in the iframe to be displayed on click of the order button
          */
         $paymentIFrame = $this->fetch(
-            'module:rocketfuel/views/templates/hook/payment_return.tpl',
+            'module:rocketfuel/views/templates/hook/payment_iframe.tpl',
             [
                 'iframe_url' => Configuration::get('ROCKETFUEL_IFRAME') ?: '',
                 'order_id' => $orderID,

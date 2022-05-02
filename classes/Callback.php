@@ -8,6 +8,7 @@
  */
 
 require_once(dirname(__FILE__, 2) . '/classes/Curl.php');
+
 class Callback
 {
     /**
@@ -134,7 +135,7 @@ class Callback
                 'cart' => $out['cart'], //$order,//cart
                 'merchant_id' => $this->merchant_id,
                 'currency' =>  $currency->iso_code,
-                'order' => (string) $order->id.' '.time(),//cart id
+                'order' => (string) $order->id,//"1236",// (string) $order->id.' '.time(),//cart id
                 'redirectUrl' => ''
             ]
         ];
