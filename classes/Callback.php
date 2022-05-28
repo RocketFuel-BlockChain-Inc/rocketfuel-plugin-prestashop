@@ -23,14 +23,14 @@ class Callback
      *
      * @var string
      */
-    protected $merchant_id, $environment;
+    protected $merchant_id, $environment, $public_key;
 
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
         
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
-
+        $this->public_key = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
         $this->request = $request;
     }
 
@@ -145,15 +145,10 @@ class Callback
         ];
 
         $out['amount'] = (string)$order->getOrderTotal();
-        
-        $out['merchant_auth'] = $this->get_encrypted($this->merchant_id);
-        
+        $out['merchant_auth'] = $this->getEncrypted($this->merchant_id);
         $out['environment'] = $this->environment;
-        
         $out['order'] = $tempId;
-        
-        $out['uuid'] = $this->get_uuid($data);
-        
+        $out['uuid'] = $this->getUUID($data);
         $out['customer'] = json_encode(new Customer($order->id_customer));
 
         return $this->sortPayload($out);
@@ -219,17 +214,20 @@ class Callback
         }
     }
 
-    protected function get_encrypted($to_crypt)
+    protected function getEncrypted($to_crypt, $useMerchantPublicKey = false)
     {
 
         $out = '';
 
-        $pub_key_path = dirname(__FILE__, 2) . '/key/.rf_public.key';
-
-        if (!file_exists($pub_key_path)) {
-            return false;
+        if (!$useMerchantPublicKey){
+            $pub_key_path = dirname(__FILE__, 2) . '/key/.rf_public.key';
+            if (!file_exists($pub_key_path)) {
+                return false;
+            }
+            $cert = file_get_contents($pub_key_path);
+        }else{
+            $cert = $this->public_key;
         }
-        $cert = file_get_contents($pub_key_path);
 
         $public_key = openssl_pkey_get_public($cert);
 
@@ -251,10 +249,10 @@ class Callback
         return base64_encode($out);
     }
 
-    protected function get_uuid($data)
+    protected function getUUID($data)
     {
         $curl = new Curl();
-file_put_contents(__DIR__.'/log.json',json_encode($data),FILE_APPEND);
+        file_put_contents(__DIR__.'/log.json',json_encode($data),FILE_APPEND);
         $paymentResponse = $curl->processDataToRkfl($data);
         file_put_contents(__DIR__.'/response.json',json_encode($paymentResponse),FILE_APPEND);
 
@@ -295,5 +293,26 @@ file_put_contents(__DIR__.'/log.json',json_encode($data),FILE_APPEND);
             'email' => Configuration::get('ROCKETFUEL_MERCHANT_EMAIL'),
             'password' => Configuration::get('ROCKETFUEL_MERCHANT_PASSWORD')
         ];
+    }
+
+    public function swapOrderId(array $data)
+    {
+        $data = json_encode([
+            'tempOrderId' => $data['temporaryOrderId'],
+            'newOrderId' =>  $data['newOrderId']
+        ]);
+
+        $order_payload = $this->getEncrypted($data, true);
+
+        $merchant_id = base64_encode($this->merchant_id);
+
+        $body = json_encode(['merchantAuth' => $order_payload, 'merchantId' => $merchant_id]);
+
+        $data = array(
+            'endpoint' => $this->getEndpoint($this->environment),
+            'body' => $body
+        );
+        $curl = new Curl();
+        return $curl->swapOrderId($data);
     }
 }
