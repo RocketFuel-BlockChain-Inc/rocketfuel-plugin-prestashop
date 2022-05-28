@@ -22,7 +22,7 @@
  *  @license   LICENSE.txt
  */
 (() => {
-
+console.log('here')
 
     let replaceButton;
     let defaultSubmitBtn;

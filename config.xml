@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>rocketfuel</name>
+    <displayName><![CDATA[Rocketfuel]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[A Simple Payment module for Prestashop.]]></description>
+    <author><![CDATA[Rocketfuel Team]]></author>
+    <tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[Are you sure you want to uninstall this module?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>

@@ -78,13 +78,13 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             $customer->secure_key
         );
 
-        $result =  $this->processPayment($this->module->currentOrder, $cart, $customer);
+        // $result =  $this->processPayment($this->module->currentOrder, $cart, $customer);
 
      
         /**
          * Redirect the customer to the order confirmation page
          */
-        Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int)$cart->id . '&id_module=' . (int)$this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key . $result['redirect']);
+        Tools::redirect('index.php?controller=order-confirmation&id_cart=' . (int)$cart->id . '&id_module=' . (int)$this->module->id . '&id_order=' . $this->module->currentOrder . '&key=' . $customer->secure_key);
         unset($cart);
         unset($customer);
     }

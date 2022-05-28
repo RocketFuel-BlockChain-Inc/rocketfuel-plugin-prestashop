@@ -126,7 +126,7 @@ class Callback
                 'quantity' => $product['cart_quantity']
             ];
         };
-
+ 
         $currency = new Currency(Context::getContext()->cookie->id_currency);
 
         $tempId = (string) md5(time());

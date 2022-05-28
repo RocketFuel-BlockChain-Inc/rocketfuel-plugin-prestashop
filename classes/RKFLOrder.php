@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Order class
  * @author Blessing Udor
@@ -46,34 +47,42 @@ class RKFLOrder
         $history->addWithemail();
         $history->save();
         return $status;*/
-        $context = Context::getContext();
-        $cart = new Cart($this->request['cart_id']);
-        /**
-         * Place the order
-         */
-        /** @var CustomerCore $customer */
-        $customer = new Customer($cart->id_customer);
+        try {
+            //code...
 
-        $this->module->validateOrder(
-            (int) $cart->id,
-            $status,
-            (float) $cart->getOrderTotal(true, Cart::BOTH),
-            $this->module->displayName,
-            null,
-            null,
-            (int) $context->currency->id,
-            false,
-            $customer->secure_key
-        );
+            $context = Context::getContext();
+            $cart = new Cart($this->request['cart_id']);
+            /**
+             * Place the order
+             */
+            /** @var CustomerCore $customer */
+            $customer = new Customer($cart->id_customer);
 
+            $this->module->validateOrder(
+                (int) $cart->id,
+                $status,
+                (float) $cart->getOrderTotal(true, Cart::BOTH),
+                $this->module->displayName,
+                null,
+                null,
+                (int) $context->currency->id,
+                false,
+                $customer->secure_key
+            );
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
         //now we have validated the order, we swap next
         $callback = new Callback();
-        try {
-            $callback->swapOrderId(['temporaryOrderId'=>$cart->id, 'newOrderId'=>$this->module->currentOrder]);
-        }catch (\Exception $throwable){
-
+        try { 
+            // $this->module->currentOrder
+            $swapResponse = $callback->swapOrderId(['temporaryOrderId' => $this->request['temp_order_id'], 'newOrderId' => $this->request['order_id']]);
+            
+        } catch (\Exception $throwable) {
         }
 
-        return true;
+        return json_encode(array(
+            "swap_response" => $swapResponse,
+        ));
     }
 }
