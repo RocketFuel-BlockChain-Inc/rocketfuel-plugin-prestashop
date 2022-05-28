@@ -28,7 +28,9 @@ class Callback
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
+        
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
+
         $this->request = $request;
     }
 
@@ -127,6 +129,8 @@ class Callback
 
         $currency = new Currency(Context::getContext()->cookie->id_currency);
 
+        $tempId = (string) md5(time());
+
         $data = [
             'cred' => $this->merchantCred(),
             'endpoint' => $this->getEndpoint($this->environment),
@@ -135,17 +139,23 @@ class Callback
                 'cart' => $out['cart'], //$order,//cart
                 'merchant_id' => $this->merchant_id,
                 'currency' =>  $currency->iso_code,
-                'order' => (string) $order->id,//"1236",// (string) $order->id.' '.time(),//cart id
+                'order' => $tempId,// (string) $order->id.' '.time(),//cart id
                 'redirectUrl' => ''
             ]
         ];
 
         $out['amount'] = (string)$order->getOrderTotal();
+        
         $out['merchant_auth'] = $this->get_encrypted($this->merchant_id);
+        
         $out['environment'] = $this->environment;
-        $out['order'] = $order->id;
+        
+        $out['order'] = $tempId;
+        
         $out['uuid'] = $this->get_uuid($data);
+        
         $out['customer'] = json_encode(new Customer($order->id_customer));
+
         return $this->sortPayload($out);
     }
 
@@ -176,7 +186,7 @@ class Callback
      *
      * @return false|string
      */
-    public function getResponse($body)
+    public function getResponse()
     {
         $order = $this->validate();
 
