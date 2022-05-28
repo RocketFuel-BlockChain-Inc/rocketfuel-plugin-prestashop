@@ -68,6 +68,7 @@ const RocketfuelPaymentEngine = {
 
     url: new URL(window.location.href),
     watchIframeShow: false,
+    payloadResponse:{},
 
     payLoad: function getPayload() {
         let url = document.querySelector("input[name=payload_url]").value;
@@ -81,31 +82,32 @@ const RocketfuelPaymentEngine = {
             }
         });
         request.send();
-        return payload;
+        RocketfuelPaymentEngine.payloadResponse = payload;
+
     },
 
     //cart_id
     orderId: function() {
-        return this.payLoad().order;
+        return RocketfuelPaymentEngine.payloadResponse.order;
     },
 
     merchantAuth: function() {
-        return this.payLoad().merchant_auth;
+        return RocketfuelPaymentEngine.payloadResponse.merchant_auth;
     },
 
 
     getUUID: function() {
-        return this.payLoad().uuid;
+        return RocketfuelPaymentEngine.payloadResponse.uuid;
     },
 
     getEnvironment: function() {
-        let environment = this.payLoad().environment;
+        let environment = RocketfuelPaymentEngine.payloadResponse.environment;
 
         return environment || 'prod';
     },
 
     getUserData: function() {
-        let user_data = this.payLoad().customer;
+        let user_data = RocketfuelPaymentEngine.payloadResponse.customer;
 
         if (!user_data) return false;
 
@@ -126,7 +128,7 @@ const RocketfuelPaymentEngine = {
             let result_status = parseInt(result.status);
 
             let fd = new FormData();
-            fd.append("order_id", RocketfuelPaymentEngine.orderId);
+            fd.append("cart_id", RocketfuelPaymentEngine.orderId);
             fd.append("status", result_status);
             fetch(rest_url, {
                 method: "POST",
@@ -141,12 +143,9 @@ const RocketfuelPaymentEngine = {
         } catch (error) {
 
         }
-        //RocketfuelPaymentEngine.showFinalOrderDetails();
-
+     
     },
-    showFinalOrderDetails: () => {
-        document.getElementById('rocket_fuel_payment_overlay_gateway').remove();
-    },
+  
     startPayment: function(autoTriggerState = true) {
 
         if (!autoTriggerState) {
@@ -154,7 +153,7 @@ const RocketfuelPaymentEngine = {
             this.watchIframeShow = true;
         }
 
-        document.getElementById('rocketfuel_retrigger_payment_button').disabled = true;
+        // document.getElementById('rocketfuel_retrigger_payment_button').disabled = true;
 
         let checkIframe = setInterval(() => {
 
@@ -168,8 +167,13 @@ const RocketfuelPaymentEngine = {
     },
     triggerPlaceOrder: function () {
         // document.getElementById('place_order').style.display = 'inherit';
-        console.log('Trigger is calling');
+        console.log('Trigger Place order is called');
 
+        replace_button(butt_inner_html);
+        
+        document.querySelector('.js-payment-confirmation .ps-shown-by-js').click();
+        
+    // butt_inner_html.
         // $('form.checkout').trigger('submit');
 
         // document.getElementById('place_order').style.display = 'none';
@@ -275,7 +279,7 @@ const RocketfuelPaymentEngine = {
                         rkflConfig.token = rkflToken;
                     }
 
-                    console.log(rkflConfig);
+                    console.log({rkflConfig});
 
                     RocketfuelPaymentEngine.rkfl = new RocketFuel(rkflConfig);
 
@@ -300,7 +304,7 @@ const RocketfuelPaymentEngine = {
         console.log('Start initiating RKFL');
 
         try {
-
+            engine.payLoad(); //Get necessary data once
             await engine.initRocketFuel();
 
         } catch (error) {

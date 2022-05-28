@@ -128,4 +128,32 @@ class Curl
 
         return $response;
     }
+
+    /**
+     * @param $data
+     * @return bool|string
+     */
+    public function swapOrderId($data)
+    {
+        $body = $data['body'];
+
+        $url = $data['endpoint'] . '/update/orderId';
+
+        $header =  array(
+            CURLOPT_URL => $url,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $body,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        );
+
+        $this->addHeader($header);
+
+        $response = curl_exec($this->curl);
+
+        curl_close($this->curl);
+
+        return $response;
+    }
 }
