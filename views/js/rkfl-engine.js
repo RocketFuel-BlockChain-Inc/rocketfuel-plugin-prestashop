@@ -128,7 +128,7 @@ const RocketfuelPaymentEngine = {
             let result_status = parseInt(result.status);
 
             let fd = new FormData();
-            fd.append("order_id", RocketfuelPaymentEngine.orderId);
+            fd.append("cart_id", RocketfuelPaymentEngine.orderId);
             fd.append("status", result_status);
             fetch(rest_url, {
                 method: "POST",
