@@ -129,7 +129,7 @@ class Callback
         }
         return $sorted;
     }
-
+    
     /**
      * Get json response for RocketFuel service
      *
@@ -140,13 +140,25 @@ class Callback
         $order = $this->validate();
 
         $body = isset($this->request['data']['data']) ? $this->request['data']['data'] : '';
-
+        if (!$body) {
+            return [
+                'status' => 'error',
+                'body' => 'no valid'
+            ];
+        }
         $signature = $this->request['signature'];
 
         $public_key = openssl_pkey_get_public(
             Tools::file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
         );
 
+        if ($this->request['data']['paymentStatus' !=  1]) {
+            return [
+                'status' => 'error',
+                'body' => 'no valid'
+            ];
+        }
+        
         // $verify = openssl_verify(
         //     $body ,
         //     base64_decode($signature),
