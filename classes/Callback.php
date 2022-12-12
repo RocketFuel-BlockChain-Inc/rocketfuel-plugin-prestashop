@@ -135,7 +135,7 @@ class Callback
      *
      * @return false|string
      */
-    public function getResponse($body)
+    public function getResponse($body='')
     {
         $order = $this->validate();
 

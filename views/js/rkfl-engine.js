@@ -1,27 +1,15 @@
 /**
-
  * NOTICE OF LICENSE
-
  *
-
  * This file is licenced under the Software License Agreement.
-
  * With the purchase or the installation of the software in your application
-
  * you accept the licence agreement.
-
  *
-
  * You must not modify, adapt or create derivative works of this source code
-
  *
-
  *  @author    Udor Blessing
-
  *  @copyright 2010-2022 RocketFuel
-
  *  @license   LICENSE.txt
-
  */
        const RocketfuelPaymentEngine = {
 
@@ -57,13 +45,13 @@
 
                 console.log("Response from callback :", result);
 
-                console.log("orderId :", RocketfuelPaymentEngine.orderId);
+                console.log("orderId :", RocketfuelPaymentEngine.orderId());
 
    
                 let result_status = parseInt(result.status);
                 
                 let fd = new FormData();
-                fd.append("order_id", RocketfuelPaymentEngine.orderId);
+                fd.append("order_id", RocketfuelPaymentEngine.orderId());
                 fd.append("status", result_status);
                 fetch(rest_url, {
                     method: "POST",
@@ -78,7 +66,7 @@
             } catch (error) {
 
             }
-            //RocketfuelPaymentEngine.showFinalOrderDetails();
+            RocketfuelPaymentEngine.showFinalOrderDetails();
 
         },
         showFinalOrderDetails: () => {
@@ -256,3 +244,4 @@
     }
 
     RocketfuelPaymentEngine.init();
+    console.log('[ RKFL_PRESTA_VERSION v1.0.2 ]')

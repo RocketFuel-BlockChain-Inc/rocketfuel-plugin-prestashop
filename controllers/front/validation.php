@@ -157,7 +157,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             'email' => Configuration::get('ROCKETFUEL_MERCHANT_EMAIL'),
             'password' => Configuration::get('ROCKETFUEL_MERCHANT_PASSWORD')
         );
-
+      
         $data = array(
             'cred' => $merchantCred,
             'endpoint' => $this->getEndpoint($this->environment),
@@ -180,15 +180,16 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
         unset($curl);
         unset($order);
         unset($currency);
-
+        
         if (!$paymentResponse) {
+            throw new \Error();
             return;
         }
 
     
 
         $result = $paymentResponse;
-
+ 
         if (!isset($result->result) && !isset($result->result->url)) {
             // wc_add_notice(__('Failed to place order', 'rocketfuel-payment-gateway'), 'error');
             return array('succcess' => 'false');
@@ -204,7 +205,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             $buildUrl .= '&env=' . $this->environment;
         }
         $buildUrl .=  "&user_data=" . $userData;
-
+ 
         return array(
             'success' => 'true',
             'redirect' => $buildUrl

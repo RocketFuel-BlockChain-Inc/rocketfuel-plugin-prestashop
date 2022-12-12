@@ -39,7 +39,7 @@ class Curl
         $response = $this->auth($data);
 
         $result = json_decode($response);
-
+       
         if (!$result) {
             return array(
                 'success' => false,
@@ -87,7 +87,7 @@ class Curl
         );
 
         $this->addHeader($header);
-
+    
         $response = curl_exec($this->curl);
         return $response;
     }
