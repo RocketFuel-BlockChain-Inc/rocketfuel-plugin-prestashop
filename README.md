@@ -23,4 +23,6 @@ Installation
 14. Paste callback URL.
 15. Click "Save".
 
-
+# ChangeLog
+1.0.0 Initial
+2.0.0 Change Iframe to checkout page

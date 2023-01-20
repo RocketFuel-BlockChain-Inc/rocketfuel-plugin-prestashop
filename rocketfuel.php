@@ -37,7 +37,7 @@ class Rocketfuel extends PaymentModule
     {
         $this->name                   = 'rocketfuel';
         $this->tab                    = 'payments_gateways';
-        $this->version                = '1.0.0';
+        $this->version                = '2.0.0';
         $this->author                 = 'Rocketfuel Team';
         $this->controllers            = array('payment', 'validation');
         $this->currencies             = true;
@@ -58,8 +58,8 @@ class Rocketfuel extends PaymentModule
     public function install()
     {
         return parent::install()
-            && $this->registerHook('paymentOptions');
-        //&& $this->registerHook('paymentReturn');
+            && $this->registerHook('paymentOptions')
+        && $this->registerHook('paymentReturn');
     }
     /**
      * Uninstall this module and remove it from all hooks
@@ -183,6 +183,7 @@ class Rocketfuel extends PaymentModule
 
         return $payment_options;
     }
+   
     /**
      * Display a message in the paymentReturn hook
      *
@@ -194,6 +195,7 @@ class Rocketfuel extends PaymentModule
         /**
          * Verify if this module is enabled
          */
+  
         if (!$this->active) {
             return;
         }
@@ -202,7 +204,9 @@ class Rocketfuel extends PaymentModule
         $payload =  array(
             'env' => Configuration::get('ROCKETFUEL_ENVIRONMENT') ?: '',
             'order_id' => $orderID,
-            'payload_url' => '/modules/rocketfuel/order.php?order_id=' . $orderID,
+         
+            'payload_url' => Context::getContext()->shop->getBaseURL(true).'modules/rocketfuel/update-order.php',
+            
             /**
              * for view payload in testing
              */
@@ -371,6 +375,7 @@ class Rocketfuel extends PaymentModule
      */
     protected function getCallbackUrl()
     {
+        var_dump(Configuration::get('PS_SHOP_DOMAIN'));
         return 'https://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/api/callback.php';
     }
 

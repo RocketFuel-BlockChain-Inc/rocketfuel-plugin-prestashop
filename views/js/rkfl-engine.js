@@ -73,10 +73,10 @@ console.log('here')
 
                 document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary').style.display = 'none';
                 document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary').style.visibility = 'hidden';
-                console.log({ activeRkfl }, "activeRkfl", document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary'));
+            
             } else {
 
-                console.log({ activeRkfl }, "ELSE --------------------->>>>>>>>>>> activeRkfl", document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary'));
+                
 
                 document.getElementById('rkfl-pay-btn').style.display = 'none';
                 document.querySelector('.js-payment-confirmation .ps-shown-by-js button.btn.btn-primary').style.visibility = 'initial'

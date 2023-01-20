@@ -3,9 +3,9 @@
 
     const params = new URLSearchParams(location.search);
 
-    const order_id = params.get('order_id');
-    const cart_id = params.get('cart_id');
-
+    const order_id = params.get('id_order');
+    const cart_id = params.get('id_cart');
+    const rest_url = document.querySelector('input[name=rest_url]').value;
     let fd = new FormData();
 
     fd.append("order_id", order_id);
@@ -15,7 +15,7 @@
 
     fd.append("temp_order_id", localStorage.getItem('rocketfuel-presta-temporary-order'));
 
-    fetch('/modules/rocketfuel/update-order.php', {
+    fetch(rest_url, {
         method: "POST",
         body: fd
     }).then(res => res.json()).then(result => {

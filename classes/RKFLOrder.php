@@ -29,6 +29,7 @@ class RKFLOrder
      */
     public function updateOrder()
     {
+     
         switch ($this->request['status']) {
             case '101':
                 $status = (int)Configuration::get('PS_OS_PAYMENT');
@@ -47,31 +48,7 @@ class RKFLOrder
         $history->addWithemail();
         $history->save();
         return $status;*/
-        try {
-            //code...
-
-            $context = Context::getContext();
-            $cart = new Cart($this->request['cart_id']);
-            /**
-             * Place the order
-             */
-            /** @var CustomerCore $customer */
-            $customer = new Customer($cart->id_customer);
-
-            $this->module->validateOrder(
-                (int) $cart->id,
-                $status,
-                (float) $cart->getOrderTotal(true, Cart::BOTH),
-                $this->module->displayName,
-                null,
-                null,
-                (int) $context->currency->id,
-                false,
-                $customer->secure_key
-            );
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
+     
         //now we have validated the order, we swap next
         $callback = new Callback();
         try { 
