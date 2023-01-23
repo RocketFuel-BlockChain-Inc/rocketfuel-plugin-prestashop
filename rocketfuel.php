@@ -376,7 +376,7 @@ class Rocketfuel extends PaymentModule
      */
     protected function getCallbackUrl()
     {
-        var_dump(Configuration::get('PS_SHOP_DOMAIN'));
+    
         return 'https://' . Configuration::get('PS_SHOP_DOMAIN') . '/modules/rocketfuel/api/callback.php';
     }
 
