@@ -1,4 +1,4 @@
-/**
+{**
 
  * NOTICE OF LICENSE
 
@@ -19,10 +19,8 @@
  *  @author    Udor Blessing
 
  *  @copyright 2010-2022 RocketFuel
-
  *  @license   LICENSE.txt
-
- */
+ *}
 <form method="post" action="{$action|escape:'htmlall':'UTF-8'}">
     <P>Now you can check your order and go to payment page.</P>
 </form>

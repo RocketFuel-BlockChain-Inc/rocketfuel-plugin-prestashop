@@ -1,10 +1,13 @@
 <?php
 /**
  * Callback Class for andling webhook
- * @author Blessing Udor
+ * 
+ * @author Blessing Udor<reachme@blessingudor.com>
  * @copyright 2010-2022 RocketFuel
  * @license   LICENSE.txt
  */
+
+require_once(dirname(__FILE__, 2) . '/classes/Curl.php');
 
 class Callback
 {
@@ -20,11 +23,14 @@ class Callback
      *
      * @var string
      */
-    protected $merchant_id;
+    protected $merchant_id, $environment, $public_key;
 
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
+        
+        $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
+        $this->public_key = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
         $this->request = $request;
     }
 
@@ -42,6 +48,7 @@ class Callback
 
         $data = json_decode($this->request['data'], true);
         $order = new Order($data['offerId']);
+// $order = new Order(8);
 
         if (!$order->reference) {
             throw new Exception('order not found');
@@ -108,6 +115,46 @@ class Callback
         return $this->sortPayload($out);
     }
 
+    public function getCartPayload($order)
+    {
+        $out = [];
+
+        foreach ($order->getProducts() as $product) {
+            $out['cart'][] = [
+                'id' => $product['id_product'],
+                'name' => $product['name'],
+                'price' => $product['price'],
+                'quantity' => $product['cart_quantity']
+            ];
+        };
+ 
+        $currency = new Currency(Context::getContext()->cookie->id_currency);
+
+        $tempId = (string) md5(time());
+
+        $data = [
+            'cred' => $this->merchantCred(),
+            'endpoint' => $this->getEndpoint($this->environment),
+            'body' => [
+                'amount' => (string)$order->getOrderTotal(),
+                'cart' => $out['cart'], //$order,//cart
+                'merchant_id' => $this->merchant_id,
+                'currency' =>  $currency->iso_code,
+                'order' => $tempId,// (string) $order->id.' '.time(),//cart id
+                'redirectUrl' => ''
+            ]
+        ];
+
+        $out['amount'] = (string)$order->getOrderTotal();
+        $out['merchant_auth'] = $this->getEncrypted($this->merchant_id);
+        $out['environment'] = $this->environment;
+        $out['order'] = $tempId;
+        $out['uuid'] = $this->getUUID($data);
+        $out['customer'] = json_encode(new Customer($order->id_customer));
+
+        return $this->sortPayload($out);
+    }
+
     /**
      * custom serialize array
      *
@@ -135,8 +182,9 @@ class Callback
      *
      * @return false|string
      */
-    public function getResponse($body)
+    public function getResponse()
     {
+       
         $order = $this->validate();
 
         $body = isset($this->request['data']['data']) ? $this->request['data']['data'] : '';
@@ -166,5 +214,107 @@ class Callback
                 'signature not valid'
             ]);
         }
+    }
+
+    protected function getEncrypted($to_crypt, $useMerchantPublicKey = false)
+    {
+
+        $out = '';
+
+        if (!$useMerchantPublicKey){
+            $pub_key_path = dirname(__FILE__, 2) . '/key/.rf_public.key';
+            if (!file_exists($pub_key_path)) {
+                return false;
+            }
+            $cert = file_get_contents($pub_key_path);
+        }else{
+            $cert = $this->public_key;
+        }
+
+        $public_key = openssl_pkey_get_public($cert);
+
+        $key_lenght = openssl_pkey_get_details($public_key);
+
+        $part_len = $key_lenght['bits'] / 8 - 11;
+
+        $parts = str_split($to_crypt, $part_len);
+
+        foreach ($parts as $part) {
+
+            $encrypted_temp = '';
+
+            openssl_public_encrypt($part, $encrypted_temp, $public_key, OPENSSL_PKCS1_OAEP_PADDING);
+
+            $out .=  $encrypted_temp;
+        }
+
+        return base64_encode($out);
+    }
+
+    protected function getUUID($data)
+    {
+        $curl = new Curl();
+        file_put_contents(__DIR__.'/log.json',json_encode($data),FILE_APPEND);
+        $paymentResponse = $curl->processDataToRkfl($data);
+        file_put_contents(__DIR__.'/response.json',json_encode($paymentResponse),FILE_APPEND);
+
+        unset($curl);
+
+        if (!$paymentResponse) {
+            return false;
+        }
+
+
+
+        $result = $paymentResponse;
+
+        if (!isset($result->result) && !isset($result->result->url)) {
+            // wc_add_notice(__('Failed to place order', 'rocketfuel-payment-gateway'), 'error');
+            return array('succcess' => 'false');
+        }
+        $urlArr = explode('/', $result->result->url);
+
+        return $urlArr[count($urlArr) - 1];
+    }
+
+    public function getEndpoint($environment)
+    {
+        $environmentData = [
+            'prod' => 'https://app.rocketfuelblockchain.com/api',
+            'dev' => 'https://dev-app.rocketdemo.net/api',
+            'stage2' => 'https://qa-app.rocketdemo.net/api',
+            'preprod' => 'https://preprod-app.rocketdemo.net/api',
+        ];
+
+        return isset($environmentData[$environment]) ? $environmentData[$environment] : 'https://app.rocketfuelblockchain.com/api';
+    }
+
+    public function merchantCred()
+    {
+        return [
+            'email' => Configuration::get('ROCKETFUEL_MERCHANT_EMAIL'),
+            'password' => Configuration::get('ROCKETFUEL_MERCHANT_PASSWORD')
+        ];
+    }
+
+    public function swapOrderId(array $data)
+    {
+        $data = json_encode([
+            'tempOrderId' => $data['temporaryOrderId'],
+            'newOrderId' =>  $data['newOrderId']
+        ]);
+
+        $order_payload = $this->getEncrypted($data, true);
+
+        $merchant_id = base64_encode($this->merchant_id);
+
+        $body = json_encode(['merchantAuth' => $order_payload, 'merchantId' => $merchant_id]);
+
+        $data = array(
+            'endpoint' => $this->getEndpoint($this->environment),
+            'body' => $body
+        );
+        $curl = new Curl();
+        return $curl->swapOrderId($data);
     }
 }
