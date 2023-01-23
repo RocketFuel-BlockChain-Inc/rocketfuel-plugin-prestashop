@@ -189,8 +189,6 @@
 
     <input type="hidden" name="rest_url" value="/modules/rocketfuel/update-order.php">
     <input type="hidden" name="payload_url" value="{$payload_url}">
-    <input type="text" name="order_id" value="{$order_id}">
-
     <div id="rocket_fuel_payment_overlay_gateway" style="display: none">
      
     </div>

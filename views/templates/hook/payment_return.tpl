@@ -25,8 +25,6 @@
 <input type="hidden" name="rest_url" value="{$payload_url}">
 <input type="hidden" name="order_id" value="{$order_id}">
  
-{$payload_url}
- 
  
 <script src="modules/rocketfuel/views/js/rkfl-success-engine.js">
 
