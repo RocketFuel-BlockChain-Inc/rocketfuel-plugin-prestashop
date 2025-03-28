@@ -26,7 +26,7 @@ class Rocketfuel extends PaymentModule
         'dev' => 'Development',
         'stage2' => 'QA',
         'preprod' => 'Pre-Production',
-
+        'sandbox' => 'Sandbox'
     ];
     /**
      * PrestaPay constructor.

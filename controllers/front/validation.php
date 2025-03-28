@@ -261,12 +261,13 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
     public function getEndpoint($environment)
     {
         $environmentData = array(
-            'prod' => 'https://app.rocketfuelblockchain.com/api',
+            'prod' => 'https://app.rocketfuel.inc/api',
             'dev' => 'https://dev-app.rocketdemo.net/api',
             'stage2' => 'https://qa-app.rocketdemo.net/api',
             'preprod' => 'https://preprod-app.rocketdemo.net/api',
+            'sandbox' => 'https://app-sandbox.rocketfuel.inc/api'
         );
 
-        return isset($environmentData[$environment]) ? $environmentData[$environment] : 'https://app.rocketfuelblockchain.com/api';
+        return isset($environmentData[$environment]) ? $environmentData[$environment] : 'https://app.rocketfuel.inc/api';
     }
 }
