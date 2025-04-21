@@ -45,7 +45,7 @@ class Rocketfuel extends PaymentModule
         $this->currencies_mode        = 'checkbox';
         $this->bootstrap              = true;
         $this->displayName            = 'Rocketfuel';
-        $this->description            = 'A Simple Payment module for Prestashop.';
+        $this->description            = 'Rocketfuel Payment Gateway for PrestaShop';
         $this->confirmUninstall       = 'Are you sure you want to uninstall this module?';
         $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
       
