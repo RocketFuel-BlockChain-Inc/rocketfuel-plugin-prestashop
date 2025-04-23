@@ -79,20 +79,20 @@ class Callback
             $public_key,
             OPENSSL_ALGO_SHA256
         );
- 
+
         if ($verify !== 1) {
             throw new Exception('signature not valid');
         }
 
 
         $data = json_decode($this->request['data']['data'], true);
-        PrestaShopLogger::addLog('Request'. "\n" . json_encode($data), 1);  
-    
+        PrestaShopLogger::addLog('Request' . "\n" . json_encode($data), 1);
+
         $temp_order_delimiter = Plugin::getPluginInfo()['temp_order_delimiter'];
         // Check if 'offerId' contains '__rkfl_temp_order__'
         if (strpos($data['offerId'], $temp_order_delimiter) !== false) {
-          
-            PrestaShopLogger::addLog('Webhook Log'. "\n" . "Creating new order ".$temp_order_delimiter, 1);  
+
+            PrestaShopLogger::addLog('Webhook Log' . "\n" . "Creating new order " . $temp_order_delimiter, 1);
 
             $temp_order_id = $data['offerId'];
             $cart_id = explode($temp_order_delimiter, $data['offerId'])[0];
@@ -101,10 +101,9 @@ class Callback
             //swap order id
             $swap = $this->swapOrderId([
                 'temporaryOrderId' => $temp_order_id,
-                'newOrderId' => $data['offerId'] 
+                'newOrderId' => $data['offerId']
             ]);
-            PrestaShopLogger::addLog('Webhook Log'. "\n" . "Swap result ". json_encode(  $swap ), 1);  
-
+            PrestaShopLogger::addLog('Webhook Log' . "\n" . "Swap result " . json_encode($swap), 1);
         }
 
         $order = new Order($data['offerId']);
@@ -122,19 +121,19 @@ class Callback
     private function manuallyCreateOrderFromCart(string $cart_id)
     {
         $cart = new Cart($cart_id);
-   
+
         if (!Validate::isLoadedObject($cart)) {
             throw new Exception("Cart not found");
         }
 
-        PrestaShopLogger::addLog('Webhook log'. "\n" . "manually creating", 1);  
+        PrestaShopLogger::addLog('Webhook log' . "\n" . "manually creating", 1);
 
         $plugin_info = Plugin::getPluginInfo(); // Replace with the desired payment module name
         $payment_method = $plugin_info['name'];
         $order_status_id = Configuration::get('PS_OS_PAYMENT'); // Or another status
         $customer = new Customer($cart->id_customer);
         $address_delivery = new Address($cart->id_address_delivery);
-   
+
         if (!Validate::isLoadedObject($customer) || !Validate::isLoadedObject($address_delivery)) {
             throw new Exception("Missing customer or address");
         }
@@ -152,8 +151,8 @@ class Callback
         if (!$module) {
             throw new Exception("Payment module not found");
         }
- 
-        PrestaShopLogger::addLog('Webhook log'. "\n" . $cart->id . '  ==== ' . $cart_id, 1);  
+
+        PrestaShopLogger::addLog('Webhook log' . "\n" . $cart->id . '  ==== ' . $cart_id, 1);
 
         // Create the order
         $module->validateOrder(
@@ -167,13 +166,13 @@ class Callback
             false, // don't use secure key here unless needed
             $customer->secure_key
         );
- 
-        PrestaShopLogger::addLog('Webhook log'. "\n This is the current Order" . $module->currentOrder, 1);  
+
+        PrestaShopLogger::addLog('Webhook log' . "\n This is the current Order" . $module->currentOrder, 1);
 
 
         return $module->currentOrder;
     }
- 
+
     public function handlePlaceOrder($cart_id)
     {
         $order = new Order($cart_id);
@@ -282,16 +281,18 @@ class Callback
 
         $total_amount = (float)$cart->getOrderTotal();
 
-        $out['cart'][] = [
-            'id' => 'shipping_carrier',
-            'name' => 'Shipping & other fees',
-            'price' =>  $total_amount - $product_amount,
-            'quantity' => 1
-        ];
+        if ($total_amount - $product_amount > 0) {
+            $out['cart'][] = [
+                'id' => 'shipping_carrier',
+                'name' => 'Shipping & other fees',
+                'price' =>  $total_amount - $product_amount,
+                'quantity' => 1
+            ];
+        }
 
         $currency = new Currency(Context::getContext()->cookie->id_currency);
         $temp_order_delimiter = Plugin::getPluginInfo()['temp_order_delimiter'];
-        $temp_order_id = $cart->id .$temp_order_delimiter . time();
+        $temp_order_id = $cart->id . $temp_order_delimiter . time();
         $data = [
             'cred' => $this->merchantCred(),
             'endpoint' => $this->getEndpoint($this->environment),
@@ -419,9 +420,9 @@ class Callback
         $curl = new Curl();
 
         $paymentResponse = $curl->processDataToRkfl($data);
-   
-        PrestaShopLogger::addLog('Webhook log'.  "\n response" . json_encode($paymentResponse), 1);  
- 
+
+        PrestaShopLogger::addLog('checkout log' .  "\n response" . json_encode($paymentResponse), 1);
+
         if (!$paymentResponse) {
             return false;
         }

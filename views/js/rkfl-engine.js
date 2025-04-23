@@ -70,9 +70,7 @@
                 const thePlaceOrderBtn = document.querySelector('#payment-confirmation .ps-shown-by-js button.btn.btn-primary');
                 if (activeRkfl) {
                     document.getElementById('rkfl-pay-btn').style.display = 'block';
-                    
-                    console.log({ activeRkfl }, "activeRkfl", {thePlaceOrderBtn});
-    
+      
     
     
                     thePlaceOrderBtn.style.display = 'none';
@@ -264,7 +262,7 @@
                     }
                     let userData = RocketfuelPaymentEngine.getUserData();
                     let merchantAuth = RocketfuelPaymentEngine.merchantAuth();
-                    console.log(userData);
+                    
                     let payload, response, rkflToken;
     
                     RocketfuelPaymentEngine.rkfl = new RocketFuel({
@@ -316,7 +314,7 @@
                                 rkflConfig.token = rkflToken;
                             }
     
-                            console.log({ rkflConfig });
+         
     
                             RocketfuelPaymentEngine.rkfl = new RocketFuel(rkflConfig);
     
