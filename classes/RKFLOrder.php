@@ -1,11 +1,17 @@
 <?php
 
+namespace RocketFuel\Classes;
+
 /**
  * Order class
  * @author Blessing Udor
  * @copyright 2010-2022 RocketFuel
  * @license   LICENSE.txt
  */
+
+use Module;
+use Configuration;
+use Exception;
 
 class RKFLOrder
 {
@@ -19,7 +25,7 @@ class RKFLOrder
 
     public function __construct($request = null)
     {
-        $this->module = Module::getInstanceByName('rocketfuel');
+        $this->module = Module::getInstanceByName(Plugin::getPluginInfo()['name']);
         $this->request = $request;
     }
     /**
@@ -29,7 +35,7 @@ class RKFLOrder
      */
     public function updateOrder()
     {
-     
+
         switch ($this->request['status']) {
             case '101':
                 $status = (int)Configuration::get('PS_OS_PAYMENT');
@@ -48,14 +54,12 @@ class RKFLOrder
         $history->addWithemail();
         $history->save();
         return $status;*/
-     
+
         //now we have validated the order, we swap next
         $callback = new Callback();
-        try { 
-            // $this->module->currentOrder
+        try {
             $swapResponse = $callback->swapOrderId(['temporaryOrderId' => $this->request['temp_order_id'], 'newOrderId' => $this->request['order_id']]);
-            
-        } catch (\Exception $throwable) {
+        } catch (Exception $throwable) {
         }
 
         return json_encode(array(

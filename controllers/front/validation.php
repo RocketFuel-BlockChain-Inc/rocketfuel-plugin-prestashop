@@ -6,6 +6,7 @@
  *
  * 
  */
+use RocketFuel\Classes\Curl;
 require_once(dirname(__FILE__, 3) . '/classes/Curl.php');
 
 class RocketfuelValidationModuleFrontController extends ModuleFrontController
@@ -65,13 +66,13 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
          * Place the order
          */
         $this->module->validateOrder(
-            (int) $this->context->cart->id,
+            (int) $cart->id,
             //Configuration::get('PS_OS_PAYMENT'),
             Configuration::get('PS_OS_BANKWIRE'),
 
-            (float) $this->context->cart->getOrderTotal(true, Cart::BOTH),
+            (float) $cart->getOrderTotal(true, Cart::BOTH),
             $this->module->displayName,
-            null,
+            "Payment via Rocketfuel",
             null,
             (int) $this->context->currency->id,
             false,
@@ -128,6 +129,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
         return $data;
     }
     /**
+     * @deprecated version
      * Process payment and redirect user to payment page
      * @param int $orderId
      * @return false|array
@@ -191,8 +193,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
         $result = $paymentResponse;
 
         if (!isset($result->result) && !isset($result->result->url)) {
-            // wc_add_notice(__('Failed to place order', 'rocketfuel-payment-gateway'), 'error');
-            return array('succcess' => 'false');
+            return array('success' => 'false', 'message' => 'Failed to place order');
         }
         $urlArr = explode('/', $result->result->url);
 

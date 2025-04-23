@@ -196,6 +196,6 @@
 
 {/nocache}
 
-<script src="modules/rocketfuel/views/js/rkfl-engine.js">
+<script src="modules/rocketfuel/views/js/rkfl-engine.js?v={$version}">
 
 </script>

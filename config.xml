@@ -2,12 +2,11 @@
 <module>
     <name>rocketfuel</name>
     <displayName><![CDATA[Rocketfuel]]></displayName>
-    <version><![CDATA[1.0.0]]></version>
-    <description><![CDATA[Rocketfuel Payment Gateway for PrestaShop.]]></description>
+    <version><![CDATA[]]></version>
+    <description><![CDATA[Rocketfuel Payment Gateway for PrestaShop]]></description>
     <author><![CDATA[Rocketfuel Team]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
 	<confirmUninstall><![CDATA[Are you sure you want to uninstall this module?]]></confirmUninstall>
     <is_configurable>1</is_configurable>
     <need_instance>1</need_instance>
-	<limited_countries></limited_countries>
 </module>

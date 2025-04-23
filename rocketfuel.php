@@ -11,7 +11,8 @@
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-require_once(dirname(__FILE__) . '/classes/Callback.php');
+use RocketFuel\Classes\Plugin;
+require_once(dirname(__FILE__) . '/classes/Plugin.php');
 
 class Rocketfuel extends PaymentModule
 {
@@ -35,20 +36,20 @@ class Rocketfuel extends PaymentModule
      */
     public function __construct()
     {
-        $this->module_key             = 'cd2ac6c3b2a488dfed10c5aca3092cec';
-        $this->name                   = 'rocketfuel';
-        $this->tab                    = 'payments_gateways';
-        $this->version                = '2.0.0';
-        $this->author                 = 'Rocketfuel Team';
-        $this->controllers            = array('payment', 'validation');
-        $this->currencies             = true;
-        $this->currencies_mode        = 'checkbox';
-        $this->bootstrap              = true;
-        $this->displayName            = 'Rocketfuel';
-        $this->description            = 'Rocketfuel Payment Gateway for PrestaShop';
-        $this->confirmUninstall       = 'Are you sure you want to uninstall this module?';
-        $this->ps_versions_compliancy = array('min' => '1.7.0', 'max' => _PS_VERSION_);
-      
+        $plugin_info = Plugin::getPluginInfo();
+        $this->module_key             = $plugin_info['module_key'];
+        $this->name                   = $plugin_info['name'];
+        $this->tab                    = $plugin_info['tab'];
+        $this->version                = $plugin_info['version'];
+        $this->author                 = $plugin_info['author'];
+        $this->controllers            = $plugin_info['controllers'];
+        $this->currencies             = $plugin_info['currencies'];
+        $this->currencies_mode        = $plugin_info['currencies_mode'];
+        $this->bootstrap              = $plugin_info['bootstrap'];
+        $this->displayName            = $plugin_info['displayName'];
+        $this->description            = $plugin_info['description'];
+        $this->confirmUninstall       = $plugin_info['confirmUninstall'];
+        $this->ps_versions_compliancy = $plugin_info['ps_versions_compliancy'];      
         parent::__construct();
     }
     /**
@@ -147,7 +148,7 @@ class Rocketfuel extends PaymentModule
          */
         $paymentForm = $this->fetch('module:rocketfuel/views/templates/hook/payment_options.tpl');
         $orderID = $params['cart']->id;
-        //var_dump($params['objOrder']);
+ 
 
         /**
          * Load in the iframe to be displayed on click of the order button
@@ -157,13 +158,14 @@ class Rocketfuel extends PaymentModule
             [
                 'iframe_url' => Configuration::get('ROCKETFUEL_IFRAME') ?: '',
                 'order_id' => $orderID,
-                'payload_url' => Context::getContext()->shop->getBaseURL(true).'modules/rocketfuel/order.php',
+                'payload_url' => Context::getContext()->shop->getBaseURL(true).'modules/rocketfuel/api/order.php',
                 /**
                  * for view payload in testing
                  */
                 'debug' => true,
                 'cart' => json_encode($params['cart']),
                 'customer' => json_encode($this->getPayload($params['cart']->id_customer)),
+                'version' => $this->version,
             ]
         );
 
@@ -212,6 +214,7 @@ class Rocketfuel extends PaymentModule
              * for view payload in testing
              */
             'debug' => true,
+            'version' => $this->version,
             'payload' => json_encode($this->getPayload($orderID)),
         );
 

@@ -1,4 +1,5 @@
 <?php
+Namespace RocketFuel\Classes;
 /**
  * Order class
  * @author Blessing Udor
@@ -10,7 +11,6 @@ class Curl
 {
 
     public $curl;
-
     /**
      * The CURL Constructor
      */
@@ -23,35 +23,48 @@ class Curl
     {
         $default = array(
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 0,      CURLOPT_RETURNTRANSFER => true);
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_RETURNTRANSFER => true
+        );
         $newOption =  $header + $default;
-  
+
         curl_setopt_array($this->curl, $newOption);
     }
     /**
      * Process data to get uuid
      *
      * @param array $data - Data from plugin.
+     * - 'cred' => string, 
+     * -   'endpoint' =>string,
+     * -   'body' => arrray
+     * -           'amount' =>string,
+     * -            'cart' => array,
+     * -            'merchant_id',
+     * -            'currency','order',
+     * -             redirectUrl
+     * @param string $accessToken - Access token for request
      */
-    public function processDataToRkfl($data)
+    public function processDataToRkfl($data, $accessToken = null)
     {
+        if (!$accessToken) {
+            $response = $this->auth($data);
 
-        $response = $this->auth($data);
+            $result = json_decode($response);
 
-        $result = json_decode($response);
-
-        if (!$result) {
-            return array(
-                'success' => false,
-                'message' => 'Authorization cannot be completed'
-            );
+            if (!$result) {
+                return array(
+                    'success' => false,
+                    'message' => 'Authorization cannot be completed'
+                );
+            }
+     
+            if (($result && $result->ok !== true) || !$result->result->access) {
+                return false;
+            }
+            $accessToken = $result->result->access;
         }
-
-        if (($result && $result->ok !== true) || !$result->result->access) {
-            return false;
-        }
-
-        $charge_response = $this->createCharge($result->result->access, $data);
+ 
+        $charge_response = $this->createCharge( $data, $accessToken);
 
         $charge_result = json_decode($charge_response);
 
@@ -59,7 +72,7 @@ class Curl
             return array('success' => false, 'message' => 'Could not establish an order: ' . $charge_result->message);
         }
 
-        return json_decode($charge_response);
+        return  $charge_result;
     }
 
     /**
@@ -77,8 +90,6 @@ class Curl
 
         $header =  array(
             CURLOPT_URL => $url,
-   
-         
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $body,
             CURLOPT_HTTPHEADER => array(
@@ -94,24 +105,22 @@ class Curl
 
     /**
      * Get UUID of the customer
-     * @param string $accessToken Access token for request
      * @param array  $data  Request body
+     * @param string $accessToken Access token for request
      *
      * @return array
      */
-    public function createCharge($accessToken, $data)
+    public function createCharge($data,$accessToken)
     {
 
         $this->curl = curl_init();
 
         $body = json_encode($data['body']);
-       
+
         $url = $data['endpoint'] . '/hosted-page';
 
         $header =  array(
             CURLOPT_URL => $url,
-         
-      
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $body,
             CURLOPT_HTTPHEADER => array(
@@ -123,7 +132,7 @@ class Curl
         $this->addHeader($header);
 
         $response = curl_exec($this->curl);
- 
+
         curl_close($this->curl);
 
         return $response;
@@ -155,5 +164,10 @@ class Curl
         curl_close($this->curl);
 
         return $response;
+    }
+
+    public function __destruct()
+    {
+        curl_close($this->curl);
     }
 }

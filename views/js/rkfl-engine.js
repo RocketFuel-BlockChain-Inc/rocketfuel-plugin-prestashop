@@ -22,7 +22,6 @@
  *  @license   LICENSE.txt
  */
 (() => {
-    console.log('here')
     
         let replaceButton;
         let defaultSubmitBtn;
@@ -51,7 +50,7 @@
             rkflSubmitButton.innerText = 'Pay with Rocketfuel';
     
             let classes = ['btn', 'btn-primary', 'rkfl-pay-btn'];
-            console.log({ classes })
+      
             classes.forEach(clas =>
                 rkflSubmitButton.classList.add(clas))
     
@@ -105,8 +104,6 @@
                             switchSubmitBtn(true);
                         } else {
     
-                            console.log('switchSubmitBtn is called')
-    
                             switchSubmitBtn();
                         }
     
@@ -139,6 +136,10 @@
                     }
                 });
                 request.send();
+                if(!payload?.uuid){
+                    throw new Error(payload?.message || payload?.error || 'Unable to initiate payment, please try again');
+                }
+                console.log('Payload response:', payload);
                 RocketfuelPaymentEngine.payloadResponse = payload;
     
             },
@@ -167,9 +168,7 @@
                 let user_data = RocketfuelPaymentEngine.payloadResponse.customer;
     
                 if (!user_data) return false;
-    
-                //let user_json = atob(user_data.replace(' ', '+'));
-    
+ 
                 return JSON.parse(user_data);
             },
             updateOrder: function (result) {
@@ -184,22 +183,7 @@
     
                     localStorage.setItem('rocketfuel-presta-order-status', result_status);
                     localStorage.setItem('rocketfuel-presta-temporary-order', RocketfuelPaymentEngine.orderId())
-    
-    
-    
-                    // let fd = new FormData();
-                    // fd.append("order_id", RocketfuelPaymentEngine.orderId());
-                    // fd.append("status", result_status);
-                    // fetch(rest_url, {
-                    //     method: "POST",
-                    //     body: fd
-                    // }).then(res => res.json()).then(result => {
-                    //     console.log(result)
-    
-                    // }).catch(e => {
-                    //     console.log(e)
-    
-                    // })
+ 
                 } catch (error) {
     
                 }
@@ -213,7 +197,6 @@
                     this.watchIframeShow = true;
                 }
     
-                // document.getElementById('rocketfuel_retrigger_payment_button').disabled = true;
     
                 let checkIframe = setInterval(() => {
     
@@ -226,20 +209,10 @@
     
             },
             triggerPlaceOrder: function () {
-                // document.getElementById('place_order').style.display = 'inherit';
-                console.log('Trigger Place order is called');
-    
-                // replaceButton(defaultSubmitBtn);
-                // switchSubmitBtn();
-                
-                // document.querySelector('.js-payment-confirmation .ps-shown-by-js').click();
+  console.log('Trigger Place order is called');
+ 
                 document.querySelector('#payment-confirmation .ps-shown-by-js button.btn.btn-primary').click();
-    
-                // $('form.checkout').trigger('submit');
-    
-                // document.getElementById('place_order').style.display = 'none';
-    
-    
+ 
             },
             prepareProgressMessage: function () {
     
@@ -299,7 +272,6 @@
                     });
     
                     if (userData.firstname && userData.email && merchantAuth) {
-                        console.log('in')
                         payload = {
                             firstName: userData.firstname,
                             lastName: userData.lastname,
@@ -362,7 +334,27 @@
                 })
     
             },
-    
+            showError: function (message) {
+                const rkflPayBtn = document.getElementById('rkfl-pay-btn');
+                if (!rkflPayBtn) return;
+            
+                // Create a span element for the error message
+                const errorSpan = document.createElement('span');
+                errorSpan.innerText = message;
+                errorSpan.style.color = 'red';
+                errorSpan.style.marginLeft = '10px';
+                errorSpan.id = 'rkfl-error-message';
+            
+                // Append the error message to the parent of #rkfl-pay-btn
+                rkflPayBtn.parentElement.appendChild(errorSpan);
+            
+                // Remove the error message after 3 seconds
+                setTimeout(() => {
+                    if (errorSpan && errorSpan.parentElement) {
+                        errorSpan.parentElement.removeChild(errorSpan);
+                    }
+                }, 3000);
+            },  
             init: async function () {
     
                 let engine = this;
@@ -374,7 +366,11 @@
     
                 } catch (error) {
     
+                    engine.prepareRetrigger();
+                    this.showError(error.message);
                     console.log('error from promise', error);
+                    return; 
+
     
                 }
     
@@ -401,4 +397,4 @@
             RocketfuelPaymentEngine.init();
         }
     })()
-    console.info('[ VERSION 2.0.0 ]')
+    console.info('[ VERSION 2.1.0 ]')

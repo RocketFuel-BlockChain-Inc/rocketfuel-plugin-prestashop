@@ -1,4 +1,7 @@
 <?php
+
+namespace RocketFuel\Classes;
+
 /**
  * Callback Class for andling webhook
  * 
@@ -7,7 +10,24 @@
  * @license   LICENSE.txt
  */
 
+use Customer;
+use Address;
+use Order;
+use Cart;
+use Currency;
+use Language;
+use Context;
+use Module;
+use Configuration;
+use Exception;
+use Validate;
+use OrderHistory;
+use Tools;
+use PrestaShopLogger; // Add this at the top with other imports
+use RocketFuel\Classes\Plugin;
+
 require_once(dirname(__FILE__, 2) . '/classes/Curl.php');
+require_once(dirname(__FILE__, 2) . '/classes/Plugin.php');
 
 class Callback
 {
@@ -28,7 +48,7 @@ class Callback
     public function __construct($request = null)
     {
         $this->merchant_id = Configuration::get('ROCKETFUEL_MERCHANT_ID');
-        
+
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
         $this->public_key = Configuration::get('ROCKETFUEL_MERCHANT_PUBLIC_KEY');
         $this->request = $request;
@@ -45,28 +65,153 @@ class Callback
         if (!is_array($this->request)) {
             throw new Exception('request data invalid');
         }
+        $body = isset($this->request['data']['data']) ? $this->request['data']['data'] : '';
 
-        $data = json_decode($this->request['data'], true);
+        $signature = $this->request['signature'];
+
+        $public_key = openssl_pkey_get_public(
+            Tools::file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
+        );
+
+        $verify = openssl_verify(
+            $body,
+            base64_decode($signature),
+            $public_key,
+            OPENSSL_ALGO_SHA256
+        );
+ 
+        if ($verify !== 1) {
+            throw new Exception('signature not valid');
+        }
+
+
+        $data = json_decode($this->request['data']['data'], true);
+        PrestaShopLogger::addLog('Request'. "\n" . json_encode($data), 1);  
+    
+        $temp_order_delimiter = Plugin::getPluginInfo()['temp_order_delimiter'];
+        // Check if 'offerId' contains '__rkfl_temp_order__'
+        if (strpos($data['offerId'], $temp_order_delimiter) !== false) {
+          
+            PrestaShopLogger::addLog('Webhook Log'. "\n" . "Creating new order ".$temp_order_delimiter, 1);  
+
+            $temp_order_id = $data['offerId'];
+            $cart_id = explode($temp_order_delimiter, $data['offerId'])[0];
+            $data['offerId'] = $this->handlePlaceOrder($cart_id);
+            // $data['offerId'] = explode($temp_order_delimiter, $data['offerId'])[0];
+            //swap order id
+            $swap = $this->swapOrderId([
+                'temporaryOrderId' => $temp_order_id,
+                'newOrderId' => $data['offerId'] 
+            ]);
+            PrestaShopLogger::addLog('Webhook Log'. "\n" . "Swap result ". json_encode(  $swap ), 1);  
+
+        }
+
         $order = new Order($data['offerId']);
-// $order = new Order(8);
 
         if (!$order->reference) {
             throw new Exception('order not found');
         }
 
         if (((int)$order->getCurrentState() <> (int)Configuration::get('PS_OS_BANKWIRE'))) {
-            throw new Exception('order payed');
+            throw new Exception('Order status has already been changed: ' . $order->id);
         }
 
         return $order;
     }
+    private function manuallyCreateOrderFromCart(string $cart_id)
+    {
+        $cart = new Cart($cart_id);
+   
+        if (!Validate::isLoadedObject($cart)) {
+            throw new Exception("Cart not found");
+        }
 
+        PrestaShopLogger::addLog('Webhook log'. "\n" . "manually creating", 1);  
+
+        $plugin_info = Plugin::getPluginInfo(); // Replace with the desired payment module name
+        $payment_method = $plugin_info['name'];
+        $order_status_id = Configuration::get('PS_OS_PAYMENT'); // Or another status
+        $customer = new Customer($cart->id_customer);
+        $address_delivery = new Address($cart->id_address_delivery);
+   
+        if (!Validate::isLoadedObject($customer) || !Validate::isLoadedObject($address_delivery)) {
+            throw new Exception("Missing customer or address");
+        }
+
+        $context = Context::getContext();
+        $context->cart = $cart;
+        $context->customer = $customer;
+        $context->currency = new Currency($cart->id_currency);
+        $context->language = new Language($cart->id_lang);
+
+        $payment_amount = $cart->getOrderTotal(true, Cart::BOTH);
+
+        $module = Module::getInstanceByName($payment_method); // Or your chosen module
+
+        if (!$module) {
+            throw new Exception("Payment module not found");
+        }
+ 
+        PrestaShopLogger::addLog('Webhook log'. "\n" . $cart->id . '  ==== ' . $cart_id, 1);  
+
+        // Create the order
+        $module->validateOrder(
+            $cart->id,
+            $order_status_id,
+            $payment_amount,
+            $payment_method,
+            null, // message
+            [], // extra vars
+            $cart->id_currency,
+            false, // don't use secure key here unless needed
+            $customer->secure_key
+        );
+ 
+        PrestaShopLogger::addLog('Webhook log'. "\n This is the current Order" . $module->currentOrder, 1);  
+
+
+        return $module->currentOrder;
+    }
+ 
+    public function handlePlaceOrder($cart_id)
+    {
+        $order = new Order($cart_id);
+
+        if ($order->reference) {
+            return $cart_id;
+        }
+
+        return  $this->manuallyCreateOrderFromCart($cart_id);
+
+        // $customer = new Customer($cart->id_customer);
+
+
+        // die();
+
+        // /**
+        //  * Place the order
+        //  */
+        // $module->validateOrder(
+        //     (int) $cart->id,
+        //     //Configuration::get('PS_OS_PAYMENT'),
+        //     Configuration::get('PS_OS_BANKWIRE'),
+
+        //     (float) $cart->getOrderTotal(true, Cart::BOTH),
+        //     $this->module->displayName,
+        //     null,
+        //     null,
+        //     1,
+        //     false,
+        //     $customer->secure_key
+        // );
+    }
     /**
-     * Make order payed
+     * Make order paid
      *
      * @param $order
      */
-    protected function makeOrderPayed($order)
+    protected function makeOrderPaid($order)
     {
         $history = new OrderHistory();
         $history->id_order = $order->id;
@@ -115,42 +260,62 @@ class Callback
         return $this->sortPayload($out);
     }
 
-    public function getCartPayload($order)
+
+    public function getCartPayload($cart)
     {
         $out = [];
+        if (!Validate::isLoadedObject($cart)) {
+            throw new Exception("Cart not found");
+        }
 
-        foreach ($order->getProducts() as $product) {
+        $product_amount = 0;
+        foreach ($cart->getProducts() as $product) {
             $out['cart'][] = [
                 'id' => $product['id_product'],
                 'name' => $product['name'],
                 'price' => $product['price'],
                 'quantity' => $product['cart_quantity']
             ];
+            $product_amount += $product['price'] * $product['cart_quantity'];
         };
- 
+        // Add shipping details
+
+        $total_amount = (float)$cart->getOrderTotal();
+
+        $out['cart'][] = [
+            'id' => 'shipping_carrier',
+            'name' => 'Shipping & other fees',
+            'price' =>  $total_amount - $product_amount,
+            'quantity' => 1
+        ];
+
         $currency = new Currency(Context::getContext()->cookie->id_currency);
-
-        $tempId = (string) md5(time());
-
+        $temp_order_delimiter = Plugin::getPluginInfo()['temp_order_delimiter'];
+        $temp_order_id = $cart->id .$temp_order_delimiter . time();
         $data = [
             'cred' => $this->merchantCred(),
             'endpoint' => $this->getEndpoint($this->environment),
             'body' => [
-                'amount' => (string)$order->getOrderTotal(),
-                'cart' => $out['cart'], //$order,//cart
+                'amount' => (string)$cart->getOrderTotal(),
+                'cart' => $out['cart'], //$cart,//cart
                 'merchant_id' => $this->merchant_id,
                 'currency' =>  $currency->iso_code,
-                'order' => $tempId,// (string) $order->id.' '.time(),//cart id
+                'order' => (string)$temp_order_id,
                 'redirectUrl' => ''
             ]
         ];
 
-        $out['amount'] = (string)$order->getOrderTotal();
+        $out['amount'] = (string)$cart->getOrderTotal();
         $out['merchant_auth'] = $this->getEncrypted($this->merchant_id);
         $out['environment'] = $this->environment;
-        $out['order'] = $tempId;
-        $out['uuid'] = $this->getUUID($data);
-        $out['customer'] = json_encode(new Customer($order->id_customer));
+        $out['order'] = $temp_order_id;
+        $uuid = $this->getUUID($data);
+
+        if (!$uuid) {
+            return array('success' => 'false', 'message' => 'Failed to place order');
+        }
+        $out['uuid'] = $uuid;
+        $out['customer'] = json_encode(new Customer($cart->id_customer));
 
         return $this->sortPayload($out);
     }
@@ -184,36 +349,20 @@ class Callback
      */
     public function getResponse()
     {
-       
+
         $order = $this->validate();
 
-        $body = isset($this->request['data']['data']) ? $this->request['data']['data'] : '';
 
-        $signature = $this->request['signature'];
-
-        $public_key = openssl_pkey_get_public(
-            Tools::file_get_contents(dirname(__FILE__) . '/../key/.rf_public.key')
-        );
-
-        // $verify = openssl_verify(
-        //     $body ,
-        //     base64_decode($signature),
-        //     $public_key,
-        //     'SHA256'
-        // );
-
-        $verify = openssl_verify($body, base64_decode($signature), $public_key, OPENSSL_ALGO_SHA256);
-
-        if ($verify) {
-            $this->makeOrderPayed($order);
-            //todo response
-            echo json_encode(['status' => 'ok']);
-        } else {
-            echo json_encode([
-                'status' => 'error',
-                'signature not valid'
-            ]);
-        }
+        // if ($verify) {
+        $this->makeOrderPaid($order);
+        //todo response
+        echo json_encode(['status' => 'ok']);
+        // } else {
+        //     echo json_encode([
+        //         'status' => 'error',
+        //         'message' => 'signature not valid'
+        //     ]);
+        // }
     }
 
     protected function getEncrypted($to_crypt, $useMerchantPublicKey = false)
@@ -221,13 +370,13 @@ class Callback
 
         $out = '';
 
-        if (!$useMerchantPublicKey){
+        if (!$useMerchantPublicKey) {
             $pub_key_path = dirname(__FILE__, 2) . '/key/.rf_public.key';
             if (!file_exists($pub_key_path)) {
                 return false;
             }
             $cert = file_get_contents($pub_key_path);
-        }else{
+        } else {
             $cert = $this->public_key;
         }
 
@@ -251,31 +400,42 @@ class Callback
         return base64_encode($out);
     }
 
+    /**
+     * Get UUID
+     *
+     * @param array $data 
+     * - 'cred' => string, 
+     * -   'endpoint' =>string,
+     * -   'body' => arrray
+     * -           'amount' =>string,
+     * -            'cart' => array,
+     * -            'merchant_id',
+     * -            'currency','order',
+     * -             redirectUrl
+     * @return string
+     */
     protected function getUUID($data)
     {
         $curl = new Curl();
-        file_put_contents(__DIR__.'/log.json',json_encode($data),FILE_APPEND);
+
         $paymentResponse = $curl->processDataToRkfl($data);
-        file_put_contents(__DIR__.'/response.json',json_encode($paymentResponse),FILE_APPEND);
-
-        unset($curl);
-
+   
+        PrestaShopLogger::addLog('Webhook log'.  "\n response" . json_encode($paymentResponse), 1);  
+ 
         if (!$paymentResponse) {
             return false;
         }
 
-
-
         $result = $paymentResponse;
 
         if (!isset($result->result) && !isset($result->result->url)) {
-            // wc_add_notice(__('Failed to place order', 'rocketfuel-payment-gateway'), 'error');
-            return array('succcess' => 'false');
+            return false;
         }
         $urlArr = explode('/', $result->result->url);
 
         return $urlArr[count($urlArr) - 1];
     }
+
 
     public function getEndpoint($environment)
     {
