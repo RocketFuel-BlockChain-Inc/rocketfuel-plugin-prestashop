@@ -269,9 +269,9 @@
                     case 'rocketfuel_iframe_close':
                         engine.prepareRetrigger();
 
-                        // if (event.data.paymentCompleted === 1) {
+                        if (event.data.paymentCompleted === 1) {
                         engine.triggerPlaceOrder();
-                        // }
+                        }
                         break;
                     case 'rocketfuel_new_height':
                         if (engine.watchIframeShow) {
