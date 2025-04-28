@@ -208,7 +208,7 @@ class Rocketfuel extends PaymentModule
             'env' => Configuration::get('ROCKETFUEL_ENVIRONMENT') ?: '',
             'order_id' => $orderID,
          
-            'payload_url' => Context::getContext()->shop->getBaseURL(true).'modules/rocketfuel/update-order.php',
+            'payload_url' => Context::getContext()->shop->getBaseURL(true).'modules/rocketfuel/api/update-order.php',
             
             /**
              * for view payload in testing

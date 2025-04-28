@@ -84,13 +84,16 @@ class Callback
             throw new Exception('signature not valid');
         }
 
-
         $data = json_decode($this->request['data']['data'], true);
         PrestaShopLogger::addLog('Request' . "\n" . json_encode($data), 1);
 
         $temp_order_delimiter = Plugin::getPluginInfo()['temp_order_delimiter'];
         // Check if 'offerId' contains '__rkfl_temp_order__'
         if (strpos($data['offerId'], $temp_order_delimiter) !== false) {
+            
+            if ((int)$data['paymentStatus'] == 0) {
+                throw new Exception('Status is still pending');
+            }
 
             PrestaShopLogger::addLog('Webhook Log' . "\n" . "Creating new order " . $temp_order_delimiter, 1);
 
@@ -121,7 +124,6 @@ class Callback
     private function manuallyCreateOrderFromCart(string $cart_id)
     {
         $cart = new Cart($cart_id);
-
         if (!Validate::isLoadedObject($cart)) {
             throw new Exception("Cart not found");
         }
@@ -168,7 +170,6 @@ class Callback
         );
 
         PrestaShopLogger::addLog('Webhook log' . "\n This is the current Order" . $module->currentOrder, 1);
-
 
         return $module->currentOrder;
     }
@@ -310,6 +311,7 @@ class Callback
         $out['merchant_auth'] = $this->getEncrypted($this->merchant_id);
         $out['environment'] = $this->environment;
         $out['order'] = $temp_order_id;
+        $out['cart_id'] = $cart->id;
         $uuid = $this->getUUID($data);
 
         if (!$uuid) {
@@ -319,6 +321,27 @@ class Callback
         $out['customer'] = json_encode(new Customer($cart->id_customer));
 
         return $this->sortPayload($out);
+    }
+    public function handleSuccess()
+    {
+        $cart_id = $this->request['cart_id'];
+
+        $order = Order::getByCartId($cart_id);
+        if (!$order || !$order->reference) {
+            throw new Exception('order not found');
+        }
+
+
+        $customer = $order->getCustomer();
+
+        $plugin = Plugin::getPluginInfo();
+        $module = Module::getInstanceByName($plugin['name']);
+
+        $url = 'index.php?controller=order-confirmation&id_cart=' . (int)$cart_id . '&id_module=' . (int)$module->id . '&id_order=' . $order->id . '&key=' . $customer->secure_key;
+
+        unset($customer);
+
+        return ['data' => $url];
     }
 
     /**
@@ -352,8 +375,6 @@ class Callback
     {
 
         $order = $this->validate();
-
-
         // if ($verify) {
         $this->makeOrderPaid($order);
         //todo response

@@ -48,19 +48,11 @@ class RKFLOrder
                 $status = (int)Configuration::get('PS_OS_CANCELED');
                 break;
         }
-        /*$history = new OrderHistory();
-        $history->id_order = $this->request['order_id'];
-        $history->changeIdOrderState($status, $history->id_order);
-        $history->addWithemail();
-        $history->save();
-        return $status;*/
 
         //now we have validated the order, we swap next
         $callback = new Callback();
-        try {
-            $swapResponse = $callback->swapOrderId(['temporaryOrderId' => $this->request['temp_order_id'], 'newOrderId' => $this->request['order_id']]);
-        } catch (Exception $throwable) {
-        }
+
+        $swapResponse = $callback->swapOrderId(['temporaryOrderId' => $this->request['temp_order_id'], 'newOrderId' => $this->request['order_id']]);
 
         return json_encode(array(
             "swap_response" => $swapResponse,

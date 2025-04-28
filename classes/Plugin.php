@@ -11,7 +11,7 @@ Namespace RocketFuel\Classes;
 class Plugin
 {
     private static $name = 'rocketfuel';
-    private static $version= '2.1.0';
+    private static $version= '2.1.1';
     private static $module_key = 'cd2ac6c3b2a488dfed10c5aca3092cec';
     private static $tab = 'payments_gateways';
     private static $currencies_mode = 'checkbox';
