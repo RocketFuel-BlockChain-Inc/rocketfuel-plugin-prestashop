@@ -1,11 +1,17 @@
 <?php
 
+namespace RocketFuel\Classes;
+
 /**
  * Order class
  * @author Blessing Udor
  * @copyright 2010-2022 RocketFuel
  * @license   LICENSE.txt
  */
+
+use Module;
+use Configuration;
+use Exception;
 
 class RKFLOrder
 {
@@ -19,7 +25,7 @@ class RKFLOrder
 
     public function __construct($request = null)
     {
-        $this->module = Module::getInstanceByName('rocketfuel');
+        $this->module = Module::getInstanceByName(Plugin::getPluginInfo()['name']);
         $this->request = $request;
     }
     /**
@@ -29,7 +35,7 @@ class RKFLOrder
      */
     public function updateOrder()
     {
-     
+
         switch ($this->request['status']) {
             case '101':
                 $status = (int)Configuration::get('PS_OS_PAYMENT');
@@ -42,21 +48,11 @@ class RKFLOrder
                 $status = (int)Configuration::get('PS_OS_CANCELED');
                 break;
         }
-        /*$history = new OrderHistory();
-        $history->id_order = $this->request['order_id'];
-        $history->changeIdOrderState($status, $history->id_order);
-        $history->addWithemail();
-        $history->save();
-        return $status;*/
-     
+
         //now we have validated the order, we swap next
         $callback = new Callback();
-        try { 
-            // $this->module->currentOrder
-            $swapResponse = $callback->swapOrderId(['temporaryOrderId' => $this->request['temp_order_id'], 'newOrderId' => $this->request['order_id']]);
-            
-        } catch (\Exception $throwable) {
-        }
+
+        $swapResponse = $callback->swapOrderId(['temporaryOrderId' => $this->request['temp_order_id'], 'newOrderId' => $this->request['order_id']]);
 
         return json_encode(array(
             "swap_response" => $swapResponse,

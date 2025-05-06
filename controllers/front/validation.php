@@ -1,4 +1,5 @@
 <?php
+
 /**
  * RocketFuel - A Payment Module for PrestaShop 1.7
  *
@@ -6,6 +7,9 @@
  *
  * 
  */
+
+use RocketFuel\Classes\Curl;
+
 require_once(dirname(__FILE__, 3) . '/classes/Curl.php');
 
 class RocketfuelValidationModuleFrontController extends ModuleFrontController
@@ -19,8 +23,6 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
          * Get current cart object from session
          */
         $cart = $this->context->cart;
-
-
 
         $authorized = false;
 
@@ -61,26 +63,44 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=order&step=1');
         }
 
+        // try {
+        $cart = new Cart($cart->id);
+
+        if (!Validate::isLoadedObject($cart)) {
+
+            Tools::redirect('index.php?controller=order&step=1');
+
+        }
         /**
          * Place the order
          */
         $this->module->validateOrder(
-            (int) $this->context->cart->id,
+            (int) $cart->id,
             //Configuration::get('PS_OS_PAYMENT'),
             Configuration::get('PS_OS_BANKWIRE'),
 
-            (float) $this->context->cart->getOrderTotal(true, Cart::BOTH),
+            (float) $cart->getOrderTotal(true, Cart::BOTH),
             $this->module->displayName,
-            null,
+            "Payment via Rocketfuel",
             null,
             (int) $this->context->currency->id,
             false,
             $customer->secure_key
         );
 
+        //         } catch (\Throwable $th) {
+        //             $order= new Order($cart->id);
+
+
+        //             PrestaShopLogger::addLog('validation Error"' .  "\n validation Error" . $th->getMessage(). 'oreder reder ' .$order->reference.' vuv'.$cart->id , 1);
+        //             // new Order($cart->id);
+        //             Tools::redirect('index.php?controller=order-confirmation&id_module=' . (int)$this->module->id . '&id_order=' . $order->id . '&key=' . $customer->secure_key);
+        // return;
+        //         }
+
         // $result =  $this->processPayment($this->module->currentOrder, $cart, $customer);
 
-     
+
         /**
          * Redirect the customer to the order confirmation page
          */
@@ -93,7 +113,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
      * @param array $items 
      * @return array
      */
-    public function sortCart($items,$shippings)
+    public function sortCart($items, $shippings)
     {
         $data = array();
         try {
@@ -104,20 +124,17 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
                     'price' => $item['total'],
                     'quantity' => (string)$item['cart_quantity']
                 );
-              
             }
-  
+
             if (isset($shippings) && is_array($shippings)) {
                 foreach ($shippings as $shipping) {
                     $data[] = array(
-                        'name' => 'Shipping: '.$shipping['carrier_name'],
+                        'name' => 'Shipping: ' . $shipping['carrier_name'],
                         'id' => $shipping['id_order_invoice'],
-                        'price' =>$shipping['shipping_cost_tax_incl'],
+                        'price' => $shipping['shipping_cost_tax_incl'],
                         'quantity' => 1
                     );
                 }
-               
-                
             }
         } catch (\Throwable $th) {
 
@@ -128,6 +145,7 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
         return $data;
     }
     /**
+     * @deprecated version
      * Process payment and redirect user to payment page
      * @param int $orderId
      * @return false|array
@@ -137,16 +155,16 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
         $this->environment = Configuration::get('ROCKETFUEL_ENVIRONMENT');
 
         $merchantId = Configuration::get('ROCKETFUEL_MERCHANT_ID');
-        
+
         $order = new Order($orderId);
-        
+
         $shipping = $order->getShipping();
 
-     
+
         $currency = new Currency($order->id_currency);
 
-        $cart = $this->sortCart($cartObj->getProducts(true), $shipping );
-      
+        $cart = $this->sortCart($cartObj->getProducts(true), $shipping);
+
         $userData = base64_encode(json_encode(array(
             'first_name' => $customer->firstname,
             'last_name' => $customer->lastname,
@@ -172,8 +190,8 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             )
         );
 
-        
-       
+
+
         $curl = new Curl();
 
         $paymentResponse = $curl->processDataToRkfl($data);
@@ -186,13 +204,12 @@ class RocketfuelValidationModuleFrontController extends ModuleFrontController
             return;
         }
 
-    
+
 
         $result = $paymentResponse;
 
         if (!isset($result->result) && !isset($result->result->url)) {
-            // wc_add_notice(__('Failed to place order', 'rocketfuel-payment-gateway'), 'error');
-            return array('succcess' => 'false');
+            return array('success' => 'false', 'message' => 'Failed to place order');
         }
         $urlArr = explode('/', $result->result->url);
 
